@@ -17,6 +17,7 @@ data/*.json
 data/*.zip
 data/*.tar.gz
 data/*.gz
+data/raw/
 
 #Benchmarking outputs
 benchmarks/results/
