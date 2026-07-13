@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+#Virtual environments
+.venv/
+venv/
+
+#Environment variables
+.env
+
+#Dataset files
+data/*.log
+data/*.csv
+data/*.json
+data/*.zip
+data/*.tar.gz
+data/*.gz
+
+#Benchmarking outputs
+benchmarks/results/
+
+#IDE
+.vscode/
+.idea/
+
+#Operating system files
+.DS_Store
+Thumbs.db
