@@ -14,7 +14,7 @@ match hers exactly — the serving layer needs both sides speaking the same
 schema.
 
 Run on EMR with:
-  spark-submit --deploy-mode cluster batch_job.py --input s3://.../raw-data/ --output s3://.../batch-results/
+  spark-submit --deploy-mode cluster batch/batch_job.py --input s3://.../raw-data/ --output s3://.../batch-results/
 """
 
 import argparse
@@ -213,7 +213,7 @@ def main():
 
     elapsed = time.time() - start_time
 
-    # crude benchmarking log — the real benchmarking harness (benchmark.py)
+    # Basic benchmark log used by benchmark/run_batch_benchmarks.py.
     # will run this multiple times with different worker counts and collect these
     print(f"BENCHMARK workers={args.workers} records={record_count} elapsed_sec={elapsed:.2f}")
 

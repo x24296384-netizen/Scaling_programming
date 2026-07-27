@@ -1,6 +1,6 @@
 """ Tests for the web access-log parser."""
 import unittest
-from producer.parser import parse_log_line
+from producer.log_parser import parse_log_line
 
 class TestLogParser(unittest.TestCase):
     """Automated tests for the log parser function."""

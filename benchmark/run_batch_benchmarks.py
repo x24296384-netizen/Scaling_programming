@@ -34,7 +34,7 @@ def run_batch_job(workers):
     cmd = [
         "spark-submit",
         "--deploy-mode", "cluster",
-        "batch_job.py",
+        "batch/batch_job.py",
         "--input", INPUT_PATH,
         "--output", OUTPUT_PATH,
         "--workers", str(workers),
