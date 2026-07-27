@@ -27,7 +27,14 @@ from pyspark.sql.types import IntegerType
 # standard nginx "combined" log format regex — covers:
 # remote_addr - remote_user [time_local] "method path protocol" status bytes_sent "referer" "user_agent"
 LOG_PATTERN = (
-    r'^(\S+) \S+ \S+ \[(.*?)\] "(\S+) (\S+) (\S+)" (\d{3}) (\S+) "(.*?)" "(.*?)"'
+    r'^(\S+) \S+ \S+ '
+    r'\[([^\]]+)\] '
+    r'"([^"]*)" '
+    r'(\d{3}) '
+    r'(\S+) '
+    r'"([^"]*)" '
+    r'"([^"]*)" '
+    r'"([^"]*)"$'
 )
 
 
@@ -41,39 +48,85 @@ def build_spark_session(app_name="scp-batch-layer"):
 
 def read_raw_data(spark, input_path):
     """
-    Reads the raw nginx log as plain text lines, then parses each line with
-    regexp_extract into named columns. Malformed lines (regex doesn't match)
-    end up with an empty ip, which we filter out below — worth counting
-    those for the report's "data cleaning" section.
+    Read and parse raw Nginx access-log lines.
+
+    The returned DataFrame uses the same field names as the producer layer.
+    Timestamps are normalised to UTC so results are consistent across local
+    machines and the Amazon EMR environment.
     """
+
+    # All timestamp operations use UTC, independently of the machine timezone.
+    spark.conf.set("spark.sql.session.timeZone", "UTC")
+
     raw = spark.read.text(input_path)
 
-    df = raw.select(
-        F.regexp_extract("value", LOG_PATTERN, 1).alias("ip"),
+    parsed = raw.select(
+        F.regexp_extract("value", LOG_PATTERN, 1).alias("client_ip"),
         F.regexp_extract("value", LOG_PATTERN, 2).alias("timestamp_raw"),
-        F.regexp_extract("value", LOG_PATTERN, 3).alias("method"),
-        F.regexp_extract("value", LOG_PATTERN, 4).alias("endpoint"),
-        F.regexp_extract("value", LOG_PATTERN, 5).alias("protocol"),
-        F.regexp_extract("value", LOG_PATTERN, 6).alias("status_code_raw"),
-        F.regexp_extract("value", LOG_PATTERN, 7).alias("bytes_sent_raw"),
-        F.regexp_extract("value", LOG_PATTERN, 8).alias("referrer"),
-        F.regexp_extract("value", LOG_PATTERN, 9).alias("user_agent"),
+        F.regexp_extract("value", LOG_PATTERN, 3).alias("request_raw"),
+        F.regexp_extract("value", LOG_PATTERN, 4).alias("status_code_raw"),
+        F.regexp_extract("value", LOG_PATTERN, 5).alias("response_bytes_raw"),
+        F.regexp_extract("value", LOG_PATTERN, 6).alias("referrer"),
+        F.regexp_extract("value", LOG_PATTERN, 7).alias("user_agent"),
+        F.regexp_extract("value", LOG_PATTERN, 8).alias("extra"),
     )
 
-    # nginx time format: 30/Jul/2025:15:57:19 +0000
-    df = df.withColumn(
-        "timestamp", F.to_timestamp("timestamp_raw", "dd/MMM/yyyy:HH:mm:ss Z")
-    ).withColumn(
-        "status_code", F.col("status_code_raw").cast(IntegerType())
-    ).withColumn(
-        # bytes_sent is sometimes "-" for zero-byte responses
-        "bytes_sent",
-        F.when(F.col("bytes_sent_raw") == "-", 0)
-         .otherwise(F.col("bytes_sent_raw").cast(IntegerType())),
-    )
+    # Match the producer behaviour: split the request into three components.
+    request_parts = F.split(F.col("request_raw"), " ", 3)
+    valid_request = F.size(request_parts) == 3
 
-    # drop rows where the regex didn't match at all (empty ip = no match)
-    df = df.filter(F.col("ip") != "")
+    df = (
+        parsed
+
+        # An empty client_ip means the complete regex did not match.
+        .filter(F.col("client_ip") != "")
+
+        .withColumn(
+            "timestamp",
+            F.to_timestamp(
+                "timestamp_raw",
+                "dd/MMM/yyyy:HH:mm:ss Z",
+            ),
+        )
+        .withColumn(
+            "method",
+            F.when(valid_request, request_parts.getItem(0))
+            .otherwise(F.lit(None).cast("string")),
+        )
+        .withColumn(
+            "resource",
+            F.when(valid_request, request_parts.getItem(1))
+            .otherwise(F.col("request_raw")),
+        )
+        .withColumn(
+            "protocol",
+            F.when(valid_request, request_parts.getItem(2))
+            .otherwise(F.lit(None).cast("string")),
+        )
+        .withColumn(
+            "status_code",
+            F.col("status_code_raw").cast(IntegerType()),
+        )
+        .withColumn(
+            "response_bytes",
+            F.when(F.col("response_bytes_raw") == "-", 0)
+            .otherwise(
+                F.col("response_bytes_raw").cast(IntegerType())
+            ),
+        )
+        .select(
+            "client_ip",
+            "timestamp",
+            "method",
+            "resource",
+            "protocol",
+            "status_code",
+            "response_bytes",
+            "referrer",
+            "user_agent",
+            "extra",
+        )
+    )
 
     return df
 
@@ -84,9 +137,9 @@ def compute_batch_metrics(df):
     This is my (Nalini's) part of the split — batch layer + benchmarking.
     """
 
-    # total requests per endpoint — the baseline the speed layer compares against
-    requests_per_endpoint = (
-        df.groupBy("endpoint")
+    # total requests per resource — the baseline the speed layer compares against
+    requests_per_resource = (
+        df.groupBy("resource")
         .agg(F.count("*").alias("total_requests"))
         .orderBy(F.desc("total_requests"))
     )
@@ -102,7 +155,7 @@ def compute_batch_metrics(df):
     # historical error rate per endpoint (status codes >= 400)
     error_rates = (
         df.withColumn("is_error", (F.col("status_code") >= 400).cast("int"))
-        .groupBy("endpoint")
+        .groupBy("resource")
         .agg(
             F.count("*").alias("total_requests"),
             F.sum("is_error").alias("error_count"),
@@ -115,14 +168,14 @@ def compute_batch_metrics(df):
     # serving layer will compare live speed-layer numbers against to flag anomalies
     baseline_rpm = (
         df.withColumn("minute_bucket", F.date_trunc("minute", "timestamp"))
-        .groupBy("endpoint", "minute_bucket")
+        .groupBy("resource", "minute_bucket")
         .agg(F.count("*").alias("requests_in_minute"))
-        .groupBy("endpoint")
+        .groupBy("resource")
         .agg(F.avg("requests_in_minute").alias("avg_requests_per_minute"))
     )
 
     return {
-        "requests_per_endpoint": requests_per_endpoint,
+        "requests_per_resource": requests_per_resource,
         "traffic_by_hour": traffic_by_hour,
         "error_rates": error_rates,
         "baseline_rpm": baseline_rpm,
