@@ -46,16 +46,15 @@ def build_spark_session(app_name="scp-batch-layer"):
     )
 
 
-def read_raw_data(spark, input_path):
+def _parse_raw_data(spark, input_path):
     """
-    Read and parse raw Nginx access-log lines.
+    Parse every raw access-log line and retain validation columns.
 
-    The returned DataFrame uses the same field names as the producer layer.
-    Timestamps are normalised to UTC so results are consistent across local
-    machines and the Amazon EMR environment.
+    This internal DataFrame contains valid and invalid records so that
+    data-quality statistics can be calculated before invalid rows are removed.
     """
 
-    # All timestamp operations use UTC, independently of the machine timezone.
+    # Use UTC so local development and Amazon EMR produce identical times.
     spark.conf.set("spark.sql.session.timeZone", "UTC")
 
     raw = spark.read.text(input_path)
@@ -65,22 +64,21 @@ def read_raw_data(spark, input_path):
         F.regexp_extract("value", LOG_PATTERN, 2).alias("timestamp_raw"),
         F.regexp_extract("value", LOG_PATTERN, 3).alias("request_raw"),
         F.regexp_extract("value", LOG_PATTERN, 4).alias("status_code_raw"),
-        F.regexp_extract("value", LOG_PATTERN, 5).alias("response_bytes_raw"),
+        F.regexp_extract(
+            "value",
+            LOG_PATTERN,
+            5,
+        ).alias("response_bytes_raw"),
         F.regexp_extract("value", LOG_PATTERN, 6).alias("referrer"),
         F.regexp_extract("value", LOG_PATTERN, 7).alias("user_agent"),
         F.regexp_extract("value", LOG_PATTERN, 8).alias("extra"),
     )
 
-    # Match the producer behaviour: split the request into three components.
     request_parts = F.split(F.col("request_raw"), " ", 3)
     valid_request = F.size(request_parts) == 3
 
-    df = (
+    return (
         parsed
-
-        # An empty client_ip means the complete regex did not match.
-        .filter(F.col("client_ip") != "")
-
         .withColumn(
             "timestamp",
             F.to_timestamp(
@@ -90,18 +88,24 @@ def read_raw_data(spark, input_path):
         )
         .withColumn(
             "method",
-            F.when(valid_request, request_parts.getItem(0))
-            .otherwise(F.lit(None).cast("string")),
+            F.when(
+                valid_request,
+                request_parts.getItem(0),
+            ).otherwise(F.lit(None).cast("string")),
         )
         .withColumn(
             "resource",
-            F.when(valid_request, request_parts.getItem(1))
-            .otherwise(F.col("request_raw")),
+            F.when(
+                valid_request,
+                request_parts.getItem(1),
+            ).otherwise(F.col("request_raw")),
         )
         .withColumn(
             "protocol",
-            F.when(valid_request, request_parts.getItem(2))
-            .otherwise(F.lit(None).cast("string")),
+            F.when(
+                valid_request,
+                request_parts.getItem(2),
+            ).otherwise(F.lit(None).cast("string")),
         )
         .withColumn(
             "status_code",
@@ -109,10 +113,31 @@ def read_raw_data(spark, input_path):
         )
         .withColumn(
             "response_bytes",
-            F.when(F.col("response_bytes_raw") == "-", 0)
-            .otherwise(
-                F.col("response_bytes_raw").cast(IntegerType())
-            ),
+            F.when(
+                F.col("response_bytes_raw").rlike(r"^\d+$"),
+                F.col("response_bytes_raw").cast(IntegerType()),
+            ).otherwise(F.lit(0)),
+        )
+        # An empty client IP means the complete regular expression failed.
+        .withColumn(
+            "format_valid",
+            F.col("client_ip") != "",
+        )
+        .withColumn(
+            "timestamp_valid",
+            F.col("timestamp").isNotNull(),
+        )
+    )
+
+
+def _select_valid_records(parsed):
+    """Return valid records using the official project schema."""
+
+    return (
+        parsed
+        .filter(
+            F.col("format_valid")
+            & F.col("timestamp_valid")
         )
         .select(
             "client_ip",
@@ -128,7 +153,92 @@ def read_raw_data(spark, input_path):
         )
     )
 
-    return df
+
+def read_raw_data(spark, input_path):
+    """
+    Read the raw log and return only valid records.
+
+    This preserves the existing public behaviour used by the batch metrics.
+    """
+
+    parsed = _parse_raw_data(spark, input_path)
+    return _select_valid_records(parsed)
+
+
+def read_raw_data_with_quality(spark, input_path):
+    """
+    Return valid records and a summary of rejected log records.
+    """
+
+    # The parsed data is reused for quality analysis and valid-record selection.
+    parsed = _parse_raw_data(spark, input_path).cache()
+
+    quality_row = parsed.agg(
+        F.count("*").alias("total_raw_lines"),
+
+        F.sum(
+            F.when(
+                ~F.col("format_valid"),
+                1,
+            ).otherwise(0)
+        ).alias("invalid_format_records"),
+
+        F.sum(
+            F.when(
+                F.col("format_valid")
+                & ~F.col("timestamp_valid"),
+                1,
+            ).otherwise(0)
+        ).alias("invalid_timestamp_records"),
+
+        F.sum(
+            F.when(
+                F.col("format_valid")
+                & F.col("timestamp_valid"),
+                1,
+            ).otherwise(0)
+        ).alias("valid_records"),
+    ).first()
+
+    total_raw_lines = int(quality_row["total_raw_lines"])
+    valid_records = int(quality_row["valid_records"] or 0)
+    invalid_format_records = int(
+        quality_row["invalid_format_records"] or 0
+    )
+    invalid_timestamp_records = int(
+        quality_row["invalid_timestamp_records"] or 0
+    )
+
+    invalid_records = (
+        invalid_format_records
+        + invalid_timestamp_records
+    )
+
+    invalid_percentage = (
+        round(
+            invalid_records / total_raw_lines * 100,
+            2,
+        )
+        if total_raw_lines
+        else 0.0
+    )
+
+    quality = {
+        "total_raw_lines": total_raw_lines,
+        "valid_records": valid_records,
+        "invalid_records": invalid_records,
+        "invalid_format_records": invalid_format_records,
+        "invalid_timestamp_records": invalid_timestamp_records,
+        "invalid_percentage": invalid_percentage,
+    }
+
+    # Materialise and cache valid records before releasing the larger
+    # intermediate DataFrame.
+    valid_df = _select_valid_records(parsed).cache()
+    valid_df.count()
+    parsed.unpersist()
+
+    return valid_df, quality
 
 
 def compute_batch_metrics(df):
@@ -191,32 +301,76 @@ def write_results(results, output_path):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input", required=True, help="S3 path to raw data")
-    parser.add_argument("--output", required=True, help="S3 path for batch results")
+
     parser.add_argument(
-        "--workers", type=int, default=None,
-        help="Just for logging in benchmark runs — not enforced here, worker "
-             "count comes from the EMR cluster config itself"
+        "--input",
+        required=True,
+        help="S3 path to raw data"
+        )
+
+    parser.add_argument(
+        "--output",
+        required=True,
+        help="S3 path for batch results"
+        )
+
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=None,
+        help=(
+            "Just for logging in benchmark runs — not enforced here, worker "
+            "count comes from the EMR cluster config itself"
+            ),
     )
+
     args = parser.parse_args()
 
     spark = build_spark_session()
-
     start_time = time.time()
 
-    df = read_raw_data(spark, args.input)
-    df.cache()  # reused across all four aggregations below, worth caching
-    record_count = df.count()  # forces the read, also useful for benchmarking
+    # Read valid records and collect information about rejected lines.
+    df, quality = read_raw_data_with_quality(
+        spark,
+        args.input,
+    )
 
+    # The quality summary already contains the number of valid records.
+    record_count = quality["valid_records"]
+
+    print("\n=== DATA QUALITY ===")
+    print(f"Total raw lines: {quality['total_raw_lines']}")
+    print(f"Valid records: {quality['valid_records']}")
+    print(f"Invalid records: {quality['invalid_records']}")
+    print(
+        "Invalid format records: "
+        f"{quality['invalid_format_records']}"
+    )
+    print(
+        "Invalid timestamp records: "
+        f"{quality['invalid_timestamp_records']}"
+    )
+    print(
+        "Invalid percentage: "
+        f"{quality['invalid_percentage']:.2f}%"
+    )
+
+    # Calculate and save the historical batch-layer results.
     results = compute_batch_metrics(df)
     write_results(results, args.output)
 
     elapsed = time.time() - start_time
 
-    # Basic benchmark log used by benchmark/run_batch_benchmarks.py.
-    # will run this multiple times with different worker counts and collect these
-    print(f"BENCHMARK workers={args.workers} records={record_count} elapsed_sec={elapsed:.2f}")
+    # This line will be collected by the benchmark script.
+    print(
+        "BENCHMARK "
+        f"workers={args.workers} "
+        f"records={record_count} "
+        f"elapsed_sec={elapsed:.2f}"
+    )
 
+    # Release the cached DataFrame and stop Spark cleanly.
+    df.unpersist()
     spark.stop()
 
 

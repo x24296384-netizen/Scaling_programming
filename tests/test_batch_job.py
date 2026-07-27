@@ -7,14 +7,23 @@ from pathlib import Path
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
-from batch.batch_job import compute_batch_metrics, read_raw_data
-
+from batch.batch_job import (
+    compute_batch_metrics,
+    read_raw_data,
+    read_raw_data_with_quality,
+)
 
 SAMPLE_LOG = """\
 54.63.149.41 - - [10/Oct/2000:13:55:36 -0700] "GET /filter/test HTTP/1.1" 200 1234 "-" "Mozilla/5.0" "-"
 192.168.1.10 - - [11/Oct/2000:09:15:22 +0000] "POST /api/login HTTP/1.1" 500 450 "https://example.com" "TestAgent/1.0" "-"
 10.0.0.25 - - [11/Oct/2000:09:16:00 +0000] "GET /images/logo.png HTTP/1.1" 304 - "-" "Mozilla/5.0" "-"
 """
+
+QUALITY_LOG = SAMPLE_LOG + """\
+This is not a valid access-log line
+127.0.0.1 - - [not-a-valid-timestamp] "GET /bad-time HTTP/1.1" 200 10 "-" "TestAgent/1.0" "-"
+"""
+
 
 class TestBatchLogParser(unittest.TestCase):
     """Verify that the batch parser matches the producer schema."""
@@ -176,6 +185,34 @@ class TestBatchLogParser(unittest.TestCase):
                     "/api/login": 1.0,
                     "/images/logo.png": 1.0,
                 },
+            )
+
+
+    def test_data_quality_counts_valid_and_invalid_records(self):
+        """Data-quality metrics should explain rejected log records."""
+
+        with tempfile.TemporaryDirectory() as temp_directory:
+            sample_path = Path(temp_directory) / "quality_access.log"
+            sample_path.write_text(QUALITY_LOG, encoding="utf-8")
+
+            df, quality = read_raw_data_with_quality(
+                self.spark,
+                str(sample_path),
+            )
+
+            self.assertEqual(df.count(), 3)
+
+            self.assertEqual(quality["total_raw_lines"], 5)
+            self.assertEqual(quality["valid_records"], 3)
+            self.assertEqual(quality["invalid_records"], 2)
+            self.assertEqual(quality["invalid_format_records"], 1)
+            self.assertEqual(
+                quality["invalid_timestamp_records"],
+                1,
+            )
+            self.assertAlmostEqual(
+                quality["invalid_percentage"],
+                40.0,
             )
 
 if __name__ == "__main__":
