@@ -1,9 +1,11 @@
-﻿"""Tests for the PySpark batch log parser."""
+"""Tests for the PySpark batch log parser."""
 
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
 
+from pyspark import SparkContext
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
@@ -40,7 +42,27 @@ class TestBatchLogParser(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        """Stop Spark and close its Java gateway on Windows."""
+        gateway = SparkContext._gateway
+        process = getattr(gateway, "proc", None) if gateway else None
+
         cls.spark.stop()
+        cls.spark = None
+
+        if gateway is not None:
+            try:
+                gateway.shutdown()
+            finally:
+                if process is not None and process.poll() is None:
+                    process.terminate()
+
+                    try:
+                        process.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        process.kill()
+
+                SparkContext._gateway = None
+                SparkContext._jvm = None
 
     def test_parser_uses_official_schema_and_utc(self):
         """Batch parsing should match the producer and normalise time to UTC."""
