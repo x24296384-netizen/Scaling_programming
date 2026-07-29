@@ -15,45 +15,53 @@ LOG_PATTERN = re.compile(
 )
 
 def parse_log_line(line: str) -> Dict[str, Any] | None:
-    """ 
-    Convert one access log line into a dictionary. 
-    Returns None when the line does not match the expected format.
     """
+    Convert one Nginx access-log line into the frozen base schema.
+
+    Return None when the line, request or timestamp is invalid.
+    """
+
     match = LOG_PATTERN.match(line.strip())
+
+    # Reject lines that do not match the expected Nginx format.
     if match is None:
         return None
 
     data = match.groupdict()
 
-    request_parts = data['request'].split(" ", maxsplit=2)
+    # A valid HTTP request must contain method, endpoint and protocol.
+    request_parts = data["request"].split(" ", maxsplit=2)
 
-    if len(request_parts) == 3:
-        method, resource, protocol = request_parts
-    else:
-        method = None
-        resource = data['request']
-        protocol = None
+    if len(request_parts) != 3:
+        return None
 
+    method, endpoint, protocol = request_parts
+
+    # Nginx may use "-" when the response size is unknown.
     response_bytes = (
-        int(data['response_bytes']) 
-        if data['response_bytes'].isdigit() 
+        int(data["response_bytes"])
+        if data["response_bytes"].isdigit()
         else 0
     )
 
-    timestamp = datetime.strptime(
-        data['timestamp'], 
-        "%d/%b/%Y:%H:%M:%S %z"
-    )
+    # Reject malformed timestamps without stopping the complete replay.
+    try:
+        timestamp = datetime.strptime(
+            data["timestamp"],
+            "%d/%b/%Y:%H:%M:%S %z",
+        )
+    except ValueError:
+        return None
 
+    # Return only the fields agreed in the frozen base schema.
     return {
-        "client_ip": data['client_ip'],
+        "client_ip": data["client_ip"],
         "timestamp": timestamp.isoformat(),
         "method": method,
-        "resource": resource,
+        "endpoint": endpoint,
         "protocol": protocol,
-        "status_code": int(data['status_code']),
+        "status_code": int(data["status_code"]),
         "response_bytes": response_bytes,
-        "referrer": data['referrer'],
-        "user_agent": data['user_agent'],
-        "extra": data['extra'],
+        "referrer": data["referrer"],
+        "user_agent": data["user_agent"],
     }

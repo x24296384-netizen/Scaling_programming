@@ -84,23 +84,22 @@ class TestBatchLogParser(unittest.TestCase):
                 "client_ip",
                 "timestamp",
                 "method",
-                "resource",
+                "endpoint",
                 "protocol",
                 "status_code",
                 "response_bytes",
                 "referrer",
                 "user_agent",
-                "extra",
             ]
 
             self.assertEqual(df.columns, expected_columns)
             self.assertEqual(df.count(), 3)
 
             displayed_times = {
-                row["resource"]: row["timestamp_text"]
+                row["endpoint"]: row["timestamp_text"]
                 for row in (
                     df.select(
-                        "resource",
+                        "endpoint",
                         F.date_format(
                             "timestamp",
                             "yyyy-MM-dd HH:mm:ss",
@@ -119,13 +118,11 @@ class TestBatchLogParser(unittest.TestCase):
             )
 
             logo = (
-                df.filter(F.col("resource") == "/images/logo.png")
+                df.filter(F.col("endpoint") == "/images/logo.png")
                 .first()
             )
 
             self.assertEqual(logo["response_bytes"], 0)
-            self.assertEqual(logo["extra"], "-")
-
 
     def test_batch_metrics_are_correct(self):
         """Historical metrics should match the sample log contents."""
@@ -138,8 +135,8 @@ class TestBatchLogParser(unittest.TestCase):
             results = compute_batch_metrics(df)
 
             requests = {
-                row["resource"]: row["total_requests"]
-                for row in results["requests_per_resource"].collect()
+                row["endpoint"]: row["total_requests"]
+                for row in results["requests_per_endpoint"].collect()
             }
 
             self.assertEqual(
@@ -165,7 +162,7 @@ class TestBatchLogParser(unittest.TestCase):
             )
 
             errors = {
-                row["resource"]: {
+                row["endpoint"]: {
                     "total_requests": row["total_requests"],
                     "error_count": row["error_count"],
                     "error_rate": row["error_rate"],
@@ -196,7 +193,7 @@ class TestBatchLogParser(unittest.TestCase):
             )
 
             baseline = {
-                row["resource"]: row["avg_requests_per_minute"]
+                row["endpoint"]: row["avg_requests_per_minute"]
                 for row in results["baseline_rpm"].collect()
             }
 

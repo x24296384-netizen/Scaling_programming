@@ -94,7 +94,7 @@ def _parse_raw_data(spark, input_path):
             ).otherwise(F.lit(None).cast("string")),
         )
         .withColumn(
-            "resource",
+            "endpoint",
             F.when(
                 valid_request,
                 request_parts.getItem(1),
@@ -143,13 +143,12 @@ def _select_valid_records(parsed):
             "client_ip",
             "timestamp",
             "method",
-            "resource",
+            "endpoint",
             "protocol",
             "status_code",
             "response_bytes",
             "referrer",
             "user_agent",
-            "extra",
         )
     )
 
@@ -243,49 +242,87 @@ def read_raw_data_with_quality(spark, input_path):
 
 def compute_batch_metrics(df):
     """
-    Historical / "complete and accurate" view required by Lambda Architecture.
-    This is my (Nalini's) part of the split — batch layer + benchmarking.
+    Calculate historical analytics over the complete dataset.
+
+    These batch results provide the accurate historical view that
+    will later be combined with the recent speed-layer results.
     """
 
-    # total requests per resource — the baseline the speed layer compares against
-    requests_per_resource = (
-        df.groupBy("resource")
-        .agg(F.count("*").alias("total_requests"))
-        .orderBy(F.desc("total_requests"))
+    # Total number of requests received by each endpoint.
+    requests_per_endpoint = (
+        df.groupBy("endpoint")
+        .agg(
+            F.count("*").alias("total_requests")
+        )
+        .orderBy(
+            F.desc("total_requests")
+        )
     )
 
-    # average traffic by hour of day — useful for the "normal vs abnormal" story
+    # Request volume for each hour of the day.
     traffic_by_hour = (
-        df.withColumn("hour", F.hour("timestamp"))
+        df.withColumn(
+            "hour",
+            F.hour("timestamp"),
+        )
         .groupBy("hour")
-        .agg(F.count("*").alias("request_count"))
+        .agg(
+            F.count("*").alias("request_count")
+        )
         .orderBy("hour")
     )
 
-    # historical error rate per endpoint (status codes >= 400)
+    # Error rate for each endpoint using HTTP status codes 400 and above.
     error_rates = (
-        df.withColumn("is_error", (F.col("status_code") >= 400).cast("int"))
-        .groupBy("resource")
+        df.withColumn(
+            "is_error",
+            (F.col("status_code") >= 400).cast("int"),
+        )
+        .groupBy("endpoint")
         .agg(
             F.count("*").alias("total_requests"),
             F.sum("is_error").alias("error_count"),
         )
-        .withColumn("error_rate", F.col("error_count") / F.col("total_requests"))
-        .orderBy(F.desc("error_rate"))
+        .withColumn(
+            "error_rate",
+            F.col("error_count")
+            / F.col("total_requests"),
+        )
+        .orderBy(
+            F.desc("error_rate")
+        )
     )
 
-    # baseline requests-per-minute per endpoint — this is the number the
-    # serving layer will compare live speed-layer numbers against to flag anomalies
+    # Average requests per minute for each endpoint.
     baseline_rpm = (
-        df.withColumn("minute_bucket", F.date_trunc("minute", "timestamp"))
-        .groupBy("resource", "minute_bucket")
-        .agg(F.count("*").alias("requests_in_minute"))
-        .groupBy("resource")
-        .agg(F.avg("requests_in_minute").alias("avg_requests_per_minute"))
+        df.withColumn(
+            "minute_bucket",
+            F.date_trunc(
+                "minute",
+                "timestamp",
+            ),
+        )
+        .groupBy(
+            "endpoint",
+            "minute_bucket",
+        )
+        .agg(
+            F.count("*").alias(
+                "requests_in_minute"
+            )
+        )
+        .groupBy("endpoint")
+        .agg(
+            F.avg(
+                "requests_in_minute"
+            ).alias(
+                "avg_requests_per_minute"
+            )
+        )
     )
 
     return {
-        "requests_per_resource": requests_per_resource,
+        "requests_per_endpoint": requests_per_endpoint,
         "traffic_by_hour": traffic_by_hour,
         "error_rates": error_rates,
         "baseline_rpm": baseline_rpm,
