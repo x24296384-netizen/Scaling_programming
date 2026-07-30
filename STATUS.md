@@ -1,4 +1,4 @@
-# Project Status
+﻿# Project Status
 
 ## Project
 
@@ -11,17 +11,17 @@ The project analyses a large Nginx access-log dataset through two processing pat
 - PySpark batch processing on Amazon EMR
 - Real-time processing using Amazon Kinesis Data Streams
 
-The two paths form a Lambda architecture. The batch layer provides accurate historical results, while the speed layer provides recent, low-latency analytics.
+The two paths form a Lambda Architecture. The batch layer provides accurate historical analytics, while the speed layer provides recent, low-latency analytics.
 
 ## Team Responsibilities
 
-- Maryhelen: real-time ingestion, Kinesis replay and speed-layer processing
-- Nalini: PySpark batch processing, Amazon EMR, scaling and batch benchmarking
-- Shared: schema alignment, serving-layer integration, evidence, report and demonstration
+- Maryhelen: Nginx parser, Kinesis replay, speed-layer processing, integration and validation
+- Nalini: PySpark batch processing, Amazon EMR, auto-scaling and batch benchmarking
+- Shared: schema alignment, serving layer, evidence, report and presentation
 
-## Current Shared Schema — Frozen
+## Shared Event Schema
 
-The batch and real-time processing paths now use the same base schema:
+The batch and real-time paths use the same base schema:
 
 - client_ip
 - timestamp
@@ -33,7 +33,7 @@ The batch and real-time processing paths now use the same base schema:
 - referrer
 - user_agent
 
-The Kinesis replay path adds the following streaming metadata:
+The Kinesis path also adds:
 
 - event_id
 - ingested_at
@@ -41,253 +41,79 @@ The Kinesis replay path adds the following streaming metadata:
 
 Schema rules:
 
-- `timestamp` uses ISO 8601 format.
+- `timestamp` uses ISO 8601 and is normalised to UTC.
 - `status_code` is stored as an integer.
 - `response_bytes` is stored as an integer.
+- A response-byte value of `-` is converted to zero.
 - `endpoint` is the official field name.
-- `resource` is no longer used.
-- The final raw-log field is used internally to recognise the dataset format but is not included in the official event schema.
+- HTTP requests must contain method, endpoint and protocol.
 - `event_id` is generated as a UUID.
-- `ingested_at` is generated as a timezone-aware UTC timestamp.
+- `ingested_at` is a timezone-aware UTC timestamp.
 - `source` is set to `nginx_access_log`.
 
-## Schema Decision Completed
+## Day 1 - Repository and Reliability Foundation
 
-The shared schema was frozen on Day 2.
+Status: Complete
 
-Both the PySpark batch path and the Kinesis replay path now use `endpoint`. This avoids unnecessary field conversion when the batch and speed results are later combined in the serving layer.
+Completed work:
 
-The `extra` field remains part of the regular expression used to recognise the complete raw Nginx line, but it is not included in the final shared event.
+- Integrated the initial PySpark batch implementation.
+- Created the `maryhelen-integration` branch.
+- Reorganised the repository into batch, speed, producer, benchmark, serving and infrastructure modules.
+- Added Kinesis record construction.
+- Used `client_ip` as the partition key.
+- Added `PutRecords` batching.
+- Added partial-failure handling.
+- Retried only failed Kinesis records.
+- Added data-quality reporting.
+- Added automated tests for parsing, batch processing and replay reliability.
 
-## Day 1 Completed
+## Day 2 - Shared Schema and Kinesis Replay
 
-- Confirmed the active branch: `maryhelen-integration`
-- Confirmed that batch and real-time code use `client_ip`
-- Confirmed that batch and real-time code use `response_bytes`
-- Added Kinesis record creation
-- Used `client_ip` as the Kinesis partition key
-- Added batch sending through `put_records`
-- Added retry logic that resends only failed records
-- Added `boto3` to the project requirements
-- Added unit tests for Kinesis record creation and retry behaviour
-- Corrected Spark test shutdown behaviour on Windows
-- Ran the Day 1 automated test suite successfully
+Status: Complete
 
-## Day 2 Progress
+Completed work:
 
-### Shared Schema
+- Froze `endpoint` as the official shared field.
+- Replaced previous `resource` references.
+- Aligned `client_ip` and `response_bytes`.
+- Normalised batch timestamps to UTC.
+- Added `event_id`, `ingested_at` and `source`.
+- Connected the Nginx parser to the Kinesis replay path.
+- Added progressive file processing.
+- Counted and skipped malformed log lines.
+- Enforced Kinesis batch sizes between 1 and 500 records.
+- Supported complete and final partial batches.
+- Added configurable retries and retry delays.
+- Added command-line replay support.
+- Added tests for parser, replay, batching and permanent failures.
 
-- Renamed `resource` to `endpoint` in the producer parser
-- Renamed `resource` to `endpoint` in the PySpark batch parser
-- Updated the PySpark batch analytics to group results by `endpoint`
-- Renamed the batch result from `requests_per_resource` to `requests_per_endpoint`
-- Removed `extra` from the final shared event schema
-- Confirmed that parser timestamps use ISO 8601
-- Confirmed that `status_code` is an integer
-- Confirmed that `response_bytes` is an integer
+Important commits:
 
-### Streaming Metadata
+- `f0ca5c0` - Freeze endpoint schema and complete Kinesis replay
+- `ce752c4` - Update batch progress and shared schema documentation
 
-- Added `event_id` during Kinesis record creation
-- Added `ingested_at` as a timezone-aware UTC timestamp
-- Added `source` with the value `nginx_access_log`
-- Confirmed that `event_id` is a valid UUID
-- Confirmed that the original parsed event is not modified when metadata is added
+## Day 3 - Speed Layer and Benchmarks
 
-### Parsing and Replay
-
-- Added safe handling for malformed timestamps
-- Connected the Nginx parser to Kinesis record preparation
-- Added invalid-line counting
-- Ensured that invalid lines do not stop the complete replay
-- Added progressive file processing without loading the complete dataset into memory
-- Added replay support for `tests/fixtures/sample_access.log`
-- Enforced a Kinesis batch-size range from 1 to 500 records
-- Added support for full and final partial batches
-
-### Kinesis Reliability
-
-- Added partial-failure handling
-- Retried only the records that failed
-- Added a configurable maximum number of attempts
-- Added configurable retry delay
-- Counted records that still fail after the retry limit
-- Confirmed that successful records are not sent again
-
-### Batch Alignment
-
-- Updated the batch output schema to use `endpoint`
-- Removed `extra` from the selected valid batch records
-- Updated requests-per-endpoint analytics
-- Updated error-rate analytics to use `endpoint`
-- Updated baseline requests-per-minute analytics to use `endpoint`
-- Confirmed that the batch parser normalises timestamps to UTC
-
-### Day 2 Verification
-
-- Ran the complete automated test suite successfully
-- Parser tests: 3 passed
-- Kinesis replay tests: 6 passed
-- PySpark batch tests: 3 passed
-- Total: 12 tests passed
-- Result: OK
-- Execution time: 15.919 seconds
-- Checked changed files using `git diff --check`
-- No trailing whitespace or invalid blank-line errors remain
-
-## Current Analytics
-
-The batch path currently calculates:
-
-- Requests per endpoint
-- Traffic by hour
-- Error rate per endpoint
-- Average requests per minute per endpoint
-
-The planned speed layer must calculate comparable recent analytics:
-
-- Requests per endpoint
-- Error rate
-- Traffic by hour
-- Status-code distribution
-- Sliding-window request counts
-
-## Test Evidence
-
-### Day 1 Baseline
-
-- Total tests: 7
-- Result: all tests passed
-- Exit code: 0
-
-### Day 2 Parser Tests
-
-- Valid Nginx line parsing
-- Invalid log-line handling
-- Invalid timestamp handling
-- Result: 3 tests passed
-
-### Day 2 Kinesis Replay Tests
-
-- Kinesis record construction
-- Streaming metadata creation
-- Partial-failure retry
-- Retry of failed records only
-- Permanent-failure reporting
-- Invalid-line rejection and counting
-- Multiple-batch processing
-- File replay using the sample fixture
-- Result: 6 tests passed
-
-### Day 2 Batch Tests
-
-- Batch parser uses the frozen `endpoint` schema
-- Batch timestamps are normalised to UTC
-- Batch metrics use `endpoint`
-- Data-quality reporting remains correct
-- Result: 3 tests passed
-
-### Full Suite
-
-- Parser tests: 3 passed
-- Kinesis replay tests: 6 passed
-- PySpark batch tests: 3 passed
-- Total: 12 tests passed
-- Result: OK
-- Execution time: 15.919 seconds
-
-Local Spark may display Windows-specific warnings about:
-
-- `winutils.exe`
-- Native Hadoop libraries
-- Local sockets
-- Temporary-directory cleanup
-
-These warnings are related to running Spark locally on Windows. They may appear during or after successful tests and do not change the final unittest result or exit code.
-
-## Git Evidence
-
-Active branch:
-
-- `maryhelen-integration`
-
-Previously pushed commits:
-
-- `2bbbca9` — Fix Spark test shutdown on Windows
-- `367d3ae` — Add Kinesis record batching with retry support
-- `849e0b1` — Add project status and task list
-
-The Day 2 schema, metadata, batch alignment and file-replay changes are currently local and must still be committed and pushed.
-
-## Evidence to Save
-
-Recommended Day 2 evidence files:
-
-- `Day2_01_Initial_Git_Status.png`
-- `Day2_02_Parser_Baseline_Passed.png`
-- `Day2_03_Invalid_Timestamp_Handled.png`
-- `Day2_04_Parser_Tests_Passed.png`
-- `Day2_05_Replay_Baseline_Passed.png`
-- `Day2_06_Permanent_Failure_Reported.png`
-- `Day2_09_Invalid_Lines_Skipped.png`
-- `Day2_12_Kinesis_Batching_Tests_Passed.png`
-- `Day2_14_Replay_File_Tests_Passed.png`
-- `Day2_15_Parser_And_Replay_Tests_Passed.png`
-- `Day2_17_Frozen_Parser_Schema_Passed.png`
-- `Day2_19_Endpoint_Metadata_Replay_Tests_Passed.png`
-- `Day2_20_Resource_References_Audit.png`
-- `Day2_22_Batch_Endpoint_Schema_Passed.png`
-- `Day2_23_Batch_Endpoint_Metrics_Passed.png`
-- `Day2_24_Complete_Test_Suite_Passed.png`
-
-Screenshots must not expose AWS access keys, secret keys or session tokens.
-
-## Next Tasks
-
-- [x] Freeze `endpoint` as the official shared field name
-- [x] Remove `extra` from the official event schema
-- [x] Confirm ISO 8601 timestamps
-- [x] Confirm integer status and byte fields
-- [x] Add `event_id`, `ingested_at` and `source`
-- [x] Connect the replay utility to the Nginx parser
-- [x] Count and skip invalid log lines
-- [x] Enforce the Amazon Kinesis maximum batch size
-- [x] Test full and partial Kinesis batches
-- [x] Retry only failed Kinesis records
-- [x] Report permanent failures
-- [x] Test replay using the sample access-log file
-- [x] Align the PySpark batch path with `endpoint`
-- [x] Run the complete automated test suite
-- [x] Check all changed files with `git diff --check`
-- [ ] Commit and push the frozen schema and replay changes
-- [ ] Send the commit number and test result to Nalini
-- [ ] Add command-line options for input file, stream name and replay speed
-- [ ] Implement speed-layer sliding-window analytics
-- [ ] Calculate requests per endpoint in recent windows
-- [ ] Calculate recent error rate
-- [ ] Calculate recent traffic by hour
-- [ ] Calculate recent status-code distribution
-- [ ] Measure speed-layer latency and throughput
-- [ ] Run an initial test against an Amazon Kinesis stream
-- [ ] Save final Day 2 screenshots and logs in the shared OneDrive folder
-## Day 3 - Speed Layer completed
+Status: Complete
 
 ### Implementation
 
-- Added event-time sliding-window analytics with incremental eviction.
-- Added requests per endpoint, traffic by hour, error rates and HTTP status-code distribution.
-- Added a local Kinesis-style consumer with invalid JSON handling.
-- Added reusable Amazon Kinesis shard discovery, shard iterator and record-reading logic.
-- Added deterministic throughput and latency metric tests.
-- Added local full-dataset and real AWS Kinesis benchmark scripts.
+- Added event-time sliding-window analytics.
+- Added incremental event eviction.
+- Added support for out-of-order events inside the active window.
+- Kept the lower window boundary inclusive.
+- Added requests per endpoint.
+- Added traffic by hour.
+- Added error rates per endpoint.
+- Added HTTP status-code distribution.
+- Added a local Kinesis-style consumer.
+- Added invalid JSON handling.
+- Added reusable Kinesis shard discovery and record reading.
+- Added throughput and latency measurements.
+- Added local and AWS benchmark scripts.
 
-### Automated validation
-
-- 22 real-time unit and integration tests passed.
-- Parser, producer replay, retry handling, consumer, sliding window, performance metrics and Kinesis reader were validated.
-- Local fixture integration confirmed the path from raw Nginx lines to incremental analytics.
-
-### Full local streaming benchmark
+### Full Local Benchmark
 
 Dataset:
 
@@ -303,22 +129,20 @@ Measured results:
 - Runtime: 352.8049 seconds
 - Throughput: 29,379.27 lines per second
 - Valid-record throughput: 29,379.06 records per second
-- Local sampled latency mean: 0.0351 ms
-- Local sampled latency p95: 0.06968 ms
+- Sampled local latency mean: 0.0351 ms
+- Sampled local latency p95: 0.06968 ms
 
-The local latency measures raw-line parsing, Kinesis-style JSON creation,
-consumer decoding and sliding-window analytics. It excludes AWS network and
-Amazon Kinesis service latency.
+The local latency covers parsing, Kinesis-style JSON creation, consumer decoding and sliding-window analytics. It does not include AWS network latency.
 
-### Real Amazon Kinesis validation
+### Real Amazon Kinesis Smoke Test
 
 Stream configuration:
 
-- Mode: PROVISIONED
+- Mode: provisioned
 - Open shards: 1
 - Retention: 24 hours
 
-Real smoke test:
+Observed result:
 
 - Records sent: 3
 - Records received: 3
@@ -327,17 +151,153 @@ Real smoke test:
 - Failed records: 0
 - Read attempts: 1
 - Complete runtime: 0.30739 seconds
-- Measured end-to-end latency: 300.444 ms
+- Observed end-to-end latency: 300.444 ms
 
-The end-to-end measurement includes PutRecords, Amazon Kinesis availability,
-polling, JSON decoding and sliding-window processing.
+This was a controlled functional smoke test, not a maximum-throughput test.
 
-Because the real AWS test used only three controlled events, it demonstrates
-functional integration and observed latency rather than maximum Kinesis
-throughput or production-scale capacity.
+Important commit:
 
-### Day 3 status
+- `bfcfef2` - Complete Day 3 Kinesis speed layer and benchmarks
 
-Day 3 is technically complete. The Speed Layer has been implemented, tested,
-benchmarked locally on the complete dataset and validated end-to-end using a
-real Amazon Kinesis Data Stream.
+## Day 4 - Batch and Streaming Integration
+
+Status: Complete
+
+### Controlled Input
+
+Both processing paths were validated with:
+
+`tests/fixtures/integration_window.log`
+
+Controlled input result:
+
+- Raw lines: 9
+- Valid records: 7
+- Rejected records: 2
+- Total response bytes: 600
+
+### Difference Identified
+
+The producer parser rejected a malformed HTTP request, but the initial batch parser accepted it because the batch validity rule checked only the complete log format and timestamp.
+
+The batch parser was updated to validate the HTTP request structure as well.
+
+The two paths now reject the same malformed records.
+
+### Comparable Metrics
+
+The batch and streaming layers now calculate:
+
+- Total valid records
+- Total response bytes
+- Requests per endpoint
+- Error rates per endpoint
+- Traffic by hour
+- Status-code distribution
+- Response-byte totals per endpoint
+
+### Automated Comparison
+
+The following command performs the comparison:
+
+`python -m serving.compare_controlled_window`
+
+Final result:
+
+- PASS - total valid records
+- PASS - total response bytes
+- PASS - requests per endpoint
+- PASS - error rates
+- PASS - traffic by hour
+- PASS - status-code distribution
+- PASS - response-byte totals per endpoint
+
+Final comparison result:
+
+`ALL COMPARABLE METRICS MATCH`
+
+### Automated Tests
+
+- Total tests: 26
+- Result: all tests passed
+- Execution time: 15.929 seconds
+
+### Evidence
+
+Human-readable evidence:
+
+- `docs/evidence/day4/01_producer_fixture_validation.txt`
+- `docs/evidence/day4/02_batch_fixture_validation.txt`
+- `docs/evidence/day4/03_batch_alignment_confirmation.txt`
+- `docs/evidence/day4/04_batch_metrics_validation.txt`
+- `docs/evidence/day4/05_stream_metrics_validation.txt`
+- `docs/evidence/day4/06_batch_stream_comparison_clean.txt`
+- `docs/evidence/day4/07_full_test_suite.txt`
+
+Machine-readable evidence:
+
+- `results/integration/batch_stream_comparison.json`
+
+Important commit:
+
+- `e8bcb14` - Validate batch and streaming analytics parity
+
+## Current Git Status
+
+Active integration branch:
+
+- `maryhelen-integration`
+
+Latest integration commit:
+
+- `e8bcb14` - Validate batch and streaming analytics parity
+
+Pull Request:
+
+- PR #3
+- Source: `maryhelen-integration`
+- Target: `main`
+- Status: Draft
+- Merge conflicts: none
+- Review requested from Nalini
+- Merge must wait for confirmation of the latest EMR setup, benchmark configuration and AWS evidence
+
+The older `nalini-batch-layer` branch must not be merged directly because its work has already been incorporated and reorganised in the integration branch.
+
+## Local Spark Warnings
+
+Local Spark execution on Windows may show warnings relating to:
+
+- `winutils.exe`
+- `HADOOP_HOME`
+- Native Hadoop libraries
+- Local socket cleanup
+- Spark temporary-directory deletion
+
+These warnings do not invalidate successful test results when the unittest summary ends with `OK`.
+
+## Remaining Technical Tasks
+
+- [ ] Receive Nalini's review of PR #3
+- [ ] Confirm the latest EMR commands and benchmark configuration
+- [ ] Collect remaining EMR, S3 and auto-scaling screenshots
+- [ ] Add a Kinesis-triggered AWS Lambda handler
+- [ ] Document the Kinesis event-source mapping
+- [ ] Add the serving-layer comparison between historical baseline and recent traffic
+- [ ] Add or document Athena queries over batch results in Amazon S3
+- [ ] Update the architecture diagram
+- [ ] Update the README with final execution instructions
+- [ ] Prepare the technical report
+- [ ] Prepare presentation slides and demonstration notes
+- [ ] Run the final automated test suite
+- [ ] Mark PR #3 as ready for review
+- [ ] Merge PR #3 into `main`
+- [ ] Confirm that `main` is clean and deployable
+
+## Current Priority
+
+While waiting for the batch-layer review, the next independent technical task is:
+
+`Kinesis Data Streams -> Lambda event-source mapping -> speed/lambda_handler.py`
+
+This will replace manual polling as the main AWS event-processing pattern while preserving the existing parser, consumer and sliding-window analytics.
