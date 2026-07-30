@@ -1,0 +1,10 @@
+=== BATCH VERSUS STREAM COMPARISON ===
+[PASS] total_valid_records
+[PASS] total_response_bytes
+[PASS] requests_per_endpoint
+[PASS] error_rates
+[PASS] traffic_by_hour
+[PASS] status_code_distribution
+[PASS] response_byte_totals
+FINAL RESULT: ALL COMPARABLE METRICS MATCH
+Evidence saved to: results\integration\batch_stream_comparison.json

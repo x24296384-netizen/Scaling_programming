@@ -1,0 +1,87 @@
+python : 26/07/30 17:07:13 WARN Shell: Did not find winutils.exe:
+java.io.FileNotFoundException: java.io.FileNotFoundException: HADOOP_HOME and
+hadoop.home.dir are unset. -see https://wiki.apache.org/hadoop/WindowsProblems
+At line:1 char:1
++ python -m serving.compare_controlled_window 2>&1 |
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (26/07/30 17:07:...WindowsProblems:Str
+   ing) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use
+setLogLevel(newLevel).
+26/07/30 17:07:13 WARN NativeCodeLoader: Unable to load native-hadoop library for
+your platform... using builtin-java classes where applicable
+
+=== BATCH VERSUS STREAM COMPARISON ===
+[PASS] total_valid_records
+[PASS] total_response_bytes
+[PASS] requests_per_endpoint
+[PASS] error_rates
+[PASS] traffic_by_hour
+[PASS] status_code_distribution
+[PASS] response_byte_totals
+
+FINAL RESULT: ALL COMPARABLE METRICS MATCH
+Evidence saved to: results\integration\batch_stream_comparison.json
+26/07/30 17:07:23 ERROR ShutdownHookManager: Exception while deleting Spark temp
+dir: C:\Users\maryh\AppData\Local\Temp\spark-701624e0-dfee-406c-ab91-68b602f2efbf\p
+yspark-fbcfec97-937f-4403-b3bb-83d394bf781f
+java.nio.file.NoSuchFileException: C:\Users\maryh\AppData\Local\Temp\spark-701624e0
+-dfee-406c-ab91-68b602f2efbf\pyspark-fbcfec97-937f-4403-b3bb-83d394bf781f
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.j
+ava:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.jav
+a:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.jav
+a:108)
+	at java.base/sun.nio.fs.WindowsFileAttributeViews$Basic.readAttributes(WindowsFile
+AttributeViews.java:53)
+	at java.base/sun.nio.fs.WindowsFileAttributeViews$Basic.readAttributes(WindowsFile
+AttributeViews.java:38)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.readAttributes(WindowsFileSystem
+Provider.java:199)
+	at java.base/java.nio.file.Files.readAttributes(Files.java:1851)
+	at org.apache.spark.network.util.JavaUtils.deleteRecursivelyUsingJavaIO(JavaUtils.
+java:124)
+	at org.apache.spark.network.util.JavaUtils.deleteRecursively(JavaUtils.java:117)
+	at org.apache.spark.network.util.JavaUtils.deleteRecursively(JavaUtils.java:90)
+	at
+org.apache.spark.util.SparkFileUtils.deleteRecursively(SparkFileUtils.scala:121)
+	at
+org.apache.spark.util.SparkFileUtils.deleteRecursively$(SparkFileUtils.scala:120)
+	at org.apache.spark.util.Utils$.deleteRecursively(Utils.scala:1126)
+	at org.apache.spark.util.ShutdownHookManager$.$anonfun$new$4(ShutdownHookManager.s
+cala:65)
+	at org.apache.spark.util.ShutdownHookManager$.$anonfun$new$4$adapted(ShutdownHookM
+anager.scala:62)
+	at scala.collection.IndexedSeqOptimized.foreach(IndexedSeqOptimized.scala:36)
+	at scala.collection.IndexedSeqOptimized.foreach$(IndexedSeqOptimized.scala:33)
+	at scala.collection.mutable.ArrayOps$ofRef.foreach(ArrayOps.scala:198)
+	at org.apache.spark.util.ShutdownHookManager$.$anonfun$new$2(ShutdownHookManager.s
+cala:62)
+	at org.apache.spark.util.SparkShutdownHook.run(ShutdownHookManager.scala:214)
+	at org.apache.spark.util.SparkShutdownHookManager.$anonfun$runAll$2(ShutdownHookMa
+nager.scala:188)
+	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:23)
+	at org.apache.spark.util.Utils$.logUncaughtExceptions(Utils.scala:1928)
+	at org.apache.spark.util.SparkShutdownHookManager.$anonfun$runAll$1(ShutdownHookMa
+nager.scala:188)
+	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:23)
+	at scala.util.Try$.apply(Try.scala:213)
+	at org.apache.spark.util.SparkShutdownHookManager.runAll(ShutdownHookManager.scala
+:188)
+	at org.apache.spark.util.SparkShutdownHookManager$$anon$2.run(ShutdownHookManager.
+scala:178)
+	at
+java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.
+java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor
+.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+SUCCESS: The process with PID 29804 (child process of PID 7692) has been terminated.
+SUCCESS: The process with PID 7692 (child process of PID 32580) has been terminated.
+SUCCESS: The process with PID 32580 (child process of PID 31140) has been terminated.

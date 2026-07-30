@@ -1,0 +1,110 @@
+python : 26/07/30 14:48:45 WARN Shell: Did not find winutils.exe:
+java.io.FileNotFoundException: java.io.FileNotFoundException: HADOOP_HOME and
+hadoop.home.dir are unset. -see https://wiki.apache.org/hadoop/WindowsProblems
+At line:58 char:6
++ '@ | python - 2>&1 |
++      ~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (26/07/30 14:48:...WindowsProblems:Str
+   ing) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use
+setLogLevel(newLevel).
+26/07/30 14:48:45 WARN NativeCodeLoader: Unable to load native-hadoop library for
+your platform... using builtin-java classes where applicable
+
+[Stage 0:===========================================================(1 + 0) / 1]
+
+
+=== BATCH QUALITY AFTER ALIGNMENT ===
+total_raw_lines: 9
+valid_records: 7
+invalid_records: 2
+invalid_format_records: 1
+invalid_timestamp_records: 0
+invalid_request_records: 1
+invalid_percentage: 22.22
+
+=== VALID RECORDS ===
++-------------------+----------------+-----------+--------------+
+|timestamp          |endpoint        |status_code|response_bytes|
++-------------------+----------------+-----------+--------------+
+|2026-07-30 10:00:00|/               |200        |100           |
+|2026-07-30 10:00:30|/api/users      |200        |200           |
+|2026-07-30 10:01:00|/api/login      |404        |50            |
+|2026-07-30 10:01:30|/api/login      |500        |75            |
+|2026-07-30 10:02:00|/images/logo.png|304        |0             |
+|2026-07-30 10:03:00|/api/users      |200        |150           |
+|2026-07-30 10:04:00|/               |301        |25            |
++-------------------+----------------+-----------+--------------+
+
+
+=== INVALID REQUESTS STILL PRESENT ===
++---------+---------+------+--------+--------+-----------+--------------+--------+----------+
+|client_ip|timestamp|method|endpoint|protocol|status_code|response_bytes|referrer|user_agent|
++---------+---------+------+--------+--------+-----------+--------------+--------+----------+
++---------+---------+------+--------+--------+-----------+--------------+--------+----------+
+
+Batch DataFrame count: 7
+
+26/07/30 14:48:54 ERROR ShutdownHookManager: Exception while deleting Spark temp
+dir: C:\Users\maryh\AppData\Local\Temp\spark-fe008104-6a66-4ae2-ae02-891226d8ff3a\p
+yspark-daf6ae1d-ec4b-49ba-ac0e-574f45fa7a1f
+java.nio.file.NoSuchFileException: C:\Users\maryh\AppData\Local\Temp\spark-fe008104
+-6a66-4ae2-ae02-891226d8ff3a\pyspark-daf6ae1d-ec4b-49ba-ac0e-574f45fa7a1f
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.j
+ava:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.jav
+a:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.jav
+a:108)
+	at java.base/sun.nio.fs.WindowsFileAttributeViews$Basic.readAttributes(WindowsFile
+AttributeViews.java:53)
+	at java.base/sun.nio.fs.WindowsFileAttributeViews$Basic.readAttributes(WindowsFile
+AttributeViews.java:38)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.readAttributes(WindowsFileSystem
+Provider.java:199)
+	at java.base/java.nio.file.Files.readAttributes(Files.java:1851)
+	at org.apache.spark.network.util.JavaUtils.deleteRecursivelyUsingJavaIO(JavaUtils.
+java:124)
+	at org.apache.spark.network.util.JavaUtils.deleteRecursively(JavaUtils.java:117)
+	at org.apache.spark.network.util.JavaUtils.deleteRecursively(JavaUtils.java:90)
+	at
+org.apache.spark.util.SparkFileUtils.deleteRecursively(SparkFileUtils.scala:121)
+	at
+org.apache.spark.util.SparkFileUtils.deleteRecursively$(SparkFileUtils.scala:120)
+	at org.apache.spark.util.Utils$.deleteRecursively(Utils.scala:1126)
+	at org.apache.spark.util.ShutdownHookManager$.$anonfun$new$4(ShutdownHookManager.s
+cala:65)
+	at org.apache.spark.util.ShutdownHookManager$.$anonfun$new$4$adapted(ShutdownHookM
+anager.scala:62)
+	at scala.collection.IndexedSeqOptimized.foreach(IndexedSeqOptimized.scala:36)
+	at scala.collection.IndexedSeqOptimized.foreach$(IndexedSeqOptimized.scala:33)
+	at scala.collection.mutable.ArrayOps$ofRef.foreach(ArrayOps.scala:198)
+	at org.apache.spark.util.ShutdownHookManager$.$anonfun$new$2(ShutdownHookManager.s
+cala:62)
+	at org.apache.spark.util.SparkShutdownHook.run(ShutdownHookManager.scala:214)
+	at org.apache.spark.util.SparkShutdownHookManager.$anonfun$runAll$2(ShutdownHookMa
+nager.scala:188)
+	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:23)
+	at org.apache.spark.util.Utils$.logUncaughtExceptions(Utils.scala:1928)
+	at org.apache.spark.util.SparkShutdownHookManager.$anonfun$runAll$1(ShutdownHookMa
+nager.scala:188)
+	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:23)
+	at scala.util.Try$.apply(Try.scala:213)
+	at org.apache.spark.util.SparkShutdownHookManager.runAll(ShutdownHookManager.scala
+:188)
+	at org.apache.spark.util.SparkShutdownHookManager$$anon$2.run(ShutdownHookManager.
+scala:178)
+	at
+java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.
+java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor
+.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+SUCCESS: The process with PID 14028 (child process of PID 35164) has been terminated.
+SUCCESS: The process with PID 35164 (child process of PID 25060) has been terminated.
+SUCCESS: The process with PID 25060 (child process of PID 30740) has been terminated.

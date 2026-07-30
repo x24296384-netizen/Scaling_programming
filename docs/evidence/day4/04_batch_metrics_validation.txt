@@ -1,0 +1,79 @@
+python : 26/07/30 14:52:11 WARN Shell: Did not find winutils.exe:
+java.io.FileNotFoundException: java.io.FileNotFoundException: HADOOP_HOME and
+hadoop.home.dir are unset. -see https://wiki.apache.org/hadoop/WindowsProblems
+At line:60 char:6
++ '@ | python - 2>&1 |
++      ~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (26/07/30 14:52:...WindowsProblems:Str
+   ing) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use
+setLogLevel(newLevel).
+26/07/30 14:52:11 WARN NativeCodeLoader: Unable to load native-hadoop library for
+your platform... using builtin-java classes where applicable
+
+=== SUMMARY ===
++-------------------+--------------------+
+|total_valid_records|total_response_bytes|
++-------------------+--------------------+
+|7                  |600                 |
++-------------------+--------------------+
+
+
+=== REQUESTS PER ENDPOINT ===
++----------------+--------------+
+|endpoint        |total_requests|
++----------------+--------------+
+|/api/login      |2             |
+|/               |2             |
+|/api/users      |2             |
+|/images/logo.png|1             |
++----------------+--------------+
+
+
+=== ERROR RATES ===
++----------------+--------------+-----------+----------+
+|endpoint        |total_requests|error_count|error_rate|
++----------------+--------------+-----------+----------+
+|/api/login      |2             |2          |1.0       |
+|/images/logo.png|1             |0          |0.0       |
+|/               |2             |0          |0.0       |
+|/api/users      |2             |0          |0.0       |
++----------------+--------------+-----------+----------+
+
+
+=== TRAFFIC BY HOUR ===
++----+-------------+
+|hour|request_count|
++----+-------------+
+|10  |7            |
++----+-------------+
+
+
+=== STATUS CODE DISTRIBUTION ===
++-----------+-------------+
+|status_code|request_count|
++-----------+-------------+
+|200        |3            |
+|301        |1            |
+|304        |1            |
+|404        |1            |
+|500        |1            |
++-----------+-------------+
+
+
+=== RESPONSE BYTE TOTALS ===
++----------------+--------------------+
+|endpoint        |total_response_bytes|
++----------------+--------------------+
+|/               |125                 |
+|/api/login      |125                 |
+|/api/users      |350                 |
+|/images/logo.png|0                   |
++----------------+--------------------+
+
+SUCCESS: The process with PID 16440 (child process of PID 4868) has been terminated.
+SUCCESS: The process with PID 4868 (child process of PID 24448) has been terminated.
+SUCCESS: The process with PID 24448 (child process of PID 1180) has been terminated.

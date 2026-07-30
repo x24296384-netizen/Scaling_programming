@@ -118,6 +118,10 @@ def _parse_raw_data(spark, input_path):
                 F.col("response_bytes_raw").cast(IntegerType()),
             ).otherwise(F.lit(0)),
         )
+        .withColumn(
+            "request_valid",
+            valid_request,
+        )
         # An empty client IP means the complete regular expression failed.
         .withColumn(
             "format_valid",
@@ -138,6 +142,7 @@ def _select_valid_records(parsed):
         .filter(
             F.col("format_valid")
             & F.col("timestamp_valid")
+            & F.col("request_valid")
         )
         .select(
             "client_ip",
@@ -193,7 +198,17 @@ def read_raw_data_with_quality(spark, input_path):
         F.sum(
             F.when(
                 F.col("format_valid")
-                & F.col("timestamp_valid"),
+                & F.col("timestamp_valid")
+                & ~F.col("request_valid"),
+                1,
+            ).otherwise(0)
+        ).alias("invalid_request_records"),
+
+        F.sum(
+            F.when(
+                F.col("format_valid")
+                & F.col("timestamp_valid")
+                & F.col("request_valid"),
                 1,
             ).otherwise(0)
         ).alias("valid_records"),
@@ -208,9 +223,14 @@ def read_raw_data_with_quality(spark, input_path):
         quality_row["invalid_timestamp_records"] or 0
     )
 
+    invalid_request_records = int(
+        quality_row["invalid_request_records"] or 0
+    )
+
     invalid_records = (
         invalid_format_records
         + invalid_timestamp_records
+        + invalid_request_records
     )
 
     invalid_percentage = (
@@ -228,6 +248,7 @@ def read_raw_data_with_quality(spark, input_path):
         "invalid_records": invalid_records,
         "invalid_format_records": invalid_format_records,
         "invalid_timestamp_records": invalid_timestamp_records,
+        "invalid_request_records": invalid_request_records,
         "invalid_percentage": invalid_percentage,
     }
 
@@ -293,6 +314,38 @@ def compute_batch_metrics(df):
         )
     )
 
+    # Number of requests for each HTTP status code.
+    status_code_distribution = (
+        df.groupBy("status_code")
+        .agg(
+            F.count("*").alias("request_count")
+        )
+        .orderBy("status_code")
+    )
+
+    # Total response bytes returned by each endpoint.
+    response_byte_totals = (
+        df.groupBy("endpoint")
+        .agg(
+            F.sum("response_bytes").alias(
+                "total_response_bytes"
+            )
+        )
+        .orderBy("endpoint")
+    )
+
+    # Overall values used in batch-versus-stream validation.
+    summary = (
+        df.agg(
+            F.count("*").alias(
+                "total_valid_records"
+            ),
+            F.sum("response_bytes").alias(
+                "total_response_bytes"
+            ),
+        )
+    )
+
     # Average requests per minute for each endpoint.
     baseline_rpm = (
         df.withColumn(
@@ -325,6 +378,9 @@ def compute_batch_metrics(df):
         "requests_per_endpoint": requests_per_endpoint,
         "traffic_by_hour": traffic_by_hour,
         "error_rates": error_rates,
+        "status_code_distribution": status_code_distribution,
+        "response_byte_totals": response_byte_totals,
+        "summary": summary,
         "baseline_rpm": baseline_rpm,
     }
 
@@ -386,6 +442,10 @@ def main():
     print(
         "Invalid timestamp records: "
         f"{quality['invalid_timestamp_records']}"
+    )
+    print(
+        "Invalid request records: "
+        f"{quality['invalid_request_records']}"
     )
     print(
         "Invalid percentage: "

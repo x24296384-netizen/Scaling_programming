@@ -1,0 +1,14 @@
+=== STREAM QUALITY ===
+total_raw_lines: 9
+valid_records: 7
+rejected_records: 2
+
+=== SUMMARY ===
+total_valid_records: 7
+total_response_bytes: 600
+
+=== RESPONSE BYTE TOTALS ===
+/: 125
+/api/login: 125
+/api/users: 350
+/images/logo.png: 0

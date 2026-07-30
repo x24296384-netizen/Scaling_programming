@@ -1,0 +1,13 @@
+VALID line 1: 2026-07-30T10:00:00+00:00 | / | status=200 | bytes=100
+VALID line 2: 2026-07-30T10:00:30+00:00 | /api/users | status=200 | bytes=200
+VALID line 3: 2026-07-30T10:01:00+00:00 | /api/login | status=404 | bytes=50
+VALID line 4: 2026-07-30T10:01:30+00:00 | /api/login | status=500 | bytes=75
+VALID line 5: 2026-07-30T11:02:00+01:00 | /images/logo.png | status=304 | bytes=0
+VALID line 6: 2026-07-30T10:03:00+00:00 | /api/users | status=200 | bytes=150
+VALID line 7: 2026-07-30T10:04:00+00:00 | / | status=301 | bytes=25
+REJECTED line 8: this is not a valid nginx access-log line
+REJECTED line 9: 10.0.0.8 - - [30/Jul/2026:10:04:30 +0000] "BROKEN_REQUEST" 400 10 "-" "IntegrationTest/1.0" "-"
+
+Total lines: 9
+Producer valid records: 7
+Producer rejected records: 2

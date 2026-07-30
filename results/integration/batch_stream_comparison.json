@@ -1,0 +1,153 @@
+{
+  "all_metrics_match": true,
+  "batch_metrics": {
+    "error_rates": {
+      "/": {
+        "error_count": 0,
+        "error_rate": 0.0,
+        "total_requests": 2
+      },
+      "/api/login": {
+        "error_count": 2,
+        "error_rate": 1.0,
+        "total_requests": 2
+      },
+      "/api/users": {
+        "error_count": 0,
+        "error_rate": 0.0,
+        "total_requests": 2
+      },
+      "/images/logo.png": {
+        "error_count": 0,
+        "error_rate": 0.0,
+        "total_requests": 1
+      }
+    },
+    "requests_per_endpoint": {
+      "/": 2,
+      "/api/login": 2,
+      "/api/users": 2,
+      "/images/logo.png": 1
+    },
+    "response_byte_totals": {
+      "/": 125,
+      "/api/login": 125,
+      "/api/users": 350,
+      "/images/logo.png": 0
+    },
+    "status_code_distribution": {
+      "200": 3,
+      "301": 1,
+      "304": 1,
+      "404": 1,
+      "500": 1
+    },
+    "total_response_bytes": 600,
+    "total_valid_records": 7,
+    "traffic_by_hour": {
+      "10": 7
+    }
+  },
+  "batch_quality": {
+    "invalid_format_records": 1,
+    "invalid_percentage": 22.22,
+    "invalid_records": 2,
+    "invalid_request_records": 1,
+    "invalid_timestamp_records": 0,
+    "total_raw_lines": 9,
+    "valid_records": 7
+  },
+  "comparison_rule": "The same controlled input is processed by both pipelines. Streaming uses a 300-second event-time window containing all valid fixture records.",
+  "comparisons": [
+    {
+      "differences": [],
+      "match": true,
+      "metric": "total_valid_records"
+    },
+    {
+      "differences": [],
+      "match": true,
+      "metric": "total_response_bytes"
+    },
+    {
+      "differences": [],
+      "match": true,
+      "metric": "requests_per_endpoint"
+    },
+    {
+      "differences": [],
+      "match": true,
+      "metric": "error_rates"
+    },
+    {
+      "differences": [],
+      "match": true,
+      "metric": "traffic_by_hour"
+    },
+    {
+      "differences": [],
+      "match": true,
+      "metric": "status_code_distribution"
+    },
+    {
+      "differences": [],
+      "match": true,
+      "metric": "response_byte_totals"
+    }
+  ],
+  "input_path": "tests\\fixtures\\integration_window.log",
+  "stream_metrics": {
+    "error_rates": {
+      "/": {
+        "error_count": 0,
+        "error_rate": 0.0,
+        "total_requests": 2
+      },
+      "/api/login": {
+        "error_count": 2,
+        "error_rate": 1.0,
+        "total_requests": 2
+      },
+      "/api/users": {
+        "error_count": 0,
+        "error_rate": 0.0,
+        "total_requests": 2
+      },
+      "/images/logo.png": {
+        "error_count": 0,
+        "error_rate": 0.0,
+        "total_requests": 1
+      }
+    },
+    "requests_per_endpoint": {
+      "/": 2,
+      "/api/login": 2,
+      "/api/users": 2,
+      "/images/logo.png": 1
+    },
+    "response_byte_totals": {
+      "/": 125,
+      "/api/login": 125,
+      "/api/users": 350,
+      "/images/logo.png": 0
+    },
+    "status_code_distribution": {
+      "200": 3,
+      "301": 1,
+      "304": 1,
+      "404": 1,
+      "500": 1
+    },
+    "total_response_bytes": 600,
+    "total_valid_records": 7,
+    "traffic_by_hour": {
+      "10": 7
+    }
+  },
+  "stream_quality": {
+    "rejected_records": 2,
+    "total_raw_lines": 9,
+    "valid_records": 7
+  },
+  "window_seconds": 300
+}

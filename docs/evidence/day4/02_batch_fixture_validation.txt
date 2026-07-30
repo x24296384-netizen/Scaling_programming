@@ -1,0 +1,50 @@
+python : 26/07/30 14:25:41 WARN Shell: Did not find winutils.exe:
+java.io.FileNotFoundException: java.io.FileNotFoundException: HADOOP_HOME and
+hadoop.home.dir are unset. -see https://wiki.apache.org/hadoop/WindowsProblems
+At line:82 char:6
++ '@ | python - 2>&1 |
++      ~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (26/07/30 14:25:...WindowsProblems:Str
+   ing) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use
+setLogLevel(newLevel).
+26/07/30 14:25:42 WARN NativeCodeLoader: Unable to load native-hadoop library for
+your platform... using builtin-java classes where applicable
+
+=== BATCH QUALITY ===
+total_raw_lines: 9
+valid_records: 8
+invalid_records: 1
+invalid_format_records: 1
+invalid_timestamp_records: 0
+invalid_percentage: 11.11
+
+=== BATCH VALID RECORDS ===
++---------+-------------------+------+----------------+--------+-----------+--------------+
+|client_ip|timestamp          |method|endpoint        |protocol|status_code|response_bytes|
++---------+-------------------+------+----------------+--------+-----------+--------------+
+|10.0.0.1 |2026-07-30 10:00:00|GET   |/               |HTTP/1.1|200        |100           |
+|10.0.0.2 |2026-07-30 10:00:30|GET   |/api/users      |HTTP/1.1|200        |200           |
+|10.0.0.3 |2026-07-30 10:01:00|POST  |/api/login      |HTTP/1.1|404        |50            |
+|10.0.0.4 |2026-07-30 10:01:30|POST  |/api/login      |HTTP/1.1|500        |75            |
+|10.0.0.5 |2026-07-30 10:02:00|GET   |/images/logo.png|HTTP/1.1|304        |0             |
+|10.0.0.6 |2026-07-30 10:03:00|GET   |/api/users      |HTTP/1.1|200        |150           |
+|10.0.0.7 |2026-07-30 10:04:00|GET   |/               |HTTP/1.1|301        |25            |
+|10.0.0.8 |2026-07-30 10:04:30|NULL  |BROKEN_REQUEST  |NULL    |400        |10            |
++---------+-------------------+------+----------------+--------+-----------+--------------+
+
+
+=== POSSIBLE REQUEST VALIDATION DIFFERENCES ===
++---------+-------------------+------+--------------+--------+-----------+--------------+
+|client_ip|timestamp          |method|endpoint      |protocol|status_code|response_bytes|
++---------+-------------------+------+--------------+--------+-----------+--------------+
+|10.0.0.8 |2026-07-30 10:04:30|NULL  |BROKEN_REQUEST|NULL    |400        |10            |
++---------+-------------------+------+--------------+--------+-----------+--------------+
+
+Batch DataFrame count: 8
+SUCCESS: The process with PID 36748 (child process of PID 18624) has been terminated.
+SUCCESS: The process with PID 18624 (child process of PID 6160) has been terminated.
+SUCCESS: The process with PID 6160 (child process of PID 4236) has been terminated.

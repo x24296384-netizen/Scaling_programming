@@ -131,7 +131,69 @@ class TestSlidingWindowAnalytics(unittest.TestCase):
             second_snapshot["requests_per_endpoint"],
         )
 
+    def test_response_byte_metrics_follow_window_eviction(self):
+        """Response-byte totals should update when events expire."""
 
+        analytics = SlidingWindowAnalytics(
+            window_seconds=60,
+        )
+
+        analytics.add_event(
+            {
+                "timestamp": "2026-07-30T10:00:00+00:00",
+                "endpoint": "/api/users",
+                "status_code": 200,
+                "response_bytes": 100,
+            }
+        )
+
+        analytics.add_event(
+            {
+                "timestamp": "2026-07-30T10:00:30+00:00",
+                "endpoint": "/api/users",
+                "status_code": 200,
+                "response_bytes": 50,
+            }
+        )
+
+        first_snapshot = analytics.snapshot()
+
+        self.assertEqual(
+            first_snapshot["total_response_bytes"],
+            150,
+        )
+
+        self.assertEqual(
+            first_snapshot["response_byte_totals"],
+            {
+                "/api/users": 150,
+            },
+        )
+
+        # Moving the watermark to 10:02 means that the
+        # first two events are outside the 60-second window.
+        analytics.add_event(
+            {
+                "timestamp": "2026-07-30T10:02:00+00:00",
+                "endpoint": "/health",
+                "status_code": 200,
+                "response_bytes": 25,
+            }
+        )
+
+        second_snapshot = analytics.snapshot()
+
+        self.assertEqual(
+            second_snapshot["total_response_bytes"],
+            25,
+        )
+
+        self.assertEqual(
+            second_snapshot["response_byte_totals"],
+            {
+                "/health": 25,
+            },
+        )
 
     def test_empty_window_snapshot(self):
         """A new window should contain no events or time boundaries."""

@@ -41,6 +41,8 @@ class SlidingWindowAnalytics:
         self._errors_per_endpoint: Counter[str] = Counter()
         self._traffic_by_hour: Counter[int] = Counter()
         self._status_code_distribution: Counter[int] = Counter()
+        self._response_bytes_per_endpoint: Counter[str] = Counter()
+        self._total_response_bytes = 0
 
     def add_event(self, event: dict[str, Any]) -> None:
         """Add one event and remove records outside the window."""
@@ -65,9 +67,22 @@ class SlidingWindowAnalytics:
                 "event status_code must be an integer"
             ) from error
 
+        try:
+            response_bytes = int(event["response_bytes"])
+        except (KeyError, TypeError, ValueError) as error:
+            raise ValueError(
+                "event response_bytes must be an integer"
+            ) from error
+
+        if response_bytes < 0:
+            raise ValueError(
+                "event response_bytes cannot be negative"
+            )
+
         stored_event = {
             "endpoint": endpoint,
             "status_code": status_code,
+            "response_bytes": response_bytes,
             "hour": event_time.hour,
         }
 
@@ -89,6 +104,12 @@ class SlidingWindowAnalytics:
         self._requests_per_endpoint[endpoint] += 1
         self._traffic_by_hour[event_time.hour] += 1
         self._status_code_distribution[status_code] += 1
+
+        self._response_bytes_per_endpoint[
+            endpoint
+        ] += response_bytes
+
+        self._total_response_bytes += response_bytes
 
         if status_code >= 400:
             self._errors_per_endpoint[endpoint] += 1
@@ -138,6 +159,11 @@ class SlidingWindowAnalytics:
             "window_start": window_start,
             "window_end": window_end,
             "window_event_count": len(self._events),
+            "total_valid_records": len(self._events),
+            "total_response_bytes": self._total_response_bytes,
+            "response_byte_totals": dict(
+                self._response_bytes_per_endpoint
+            ),
             "requests_per_endpoint": dict(
                 self._requests_per_endpoint
             ),
@@ -175,6 +201,9 @@ class SlidingWindowAnalytics:
 
             endpoint = expired_event["endpoint"]
             status_code = expired_event["status_code"]
+            response_bytes = expired_event[
+                "response_bytes"
+            ]
             hour = expired_event["hour"]
 
             self._decrement_counter(
@@ -189,6 +218,13 @@ class SlidingWindowAnalytics:
                 self._status_code_distribution,
                 status_code,
             )
+            self._decrement_counter_by_value(
+                self._response_bytes_per_endpoint,
+                endpoint,
+                response_bytes,
+            )
+
+            self._total_response_bytes -= response_bytes
 
             if status_code >= 400:
                 self._decrement_counter(
@@ -204,6 +240,19 @@ class SlidingWindowAnalytics:
         """Decrease a counter and remove zero-value entries."""
 
         counter[key] -= 1
+
+        if counter[key] <= 0:
+            del counter[key]
+
+    @staticmethod
+    def _decrement_counter_by_value(
+        counter: Counter,
+        key: Any,
+        value: int,
+    ) -> None:
+        """Subtract a numeric value and remove empty entries."""
+
+        counter[key] -= value
 
         if counter[key] <= 0:
             del counter[key]
