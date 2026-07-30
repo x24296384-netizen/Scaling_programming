@@ -176,17 +176,16 @@ Controlled input result:
 - Rejected records: 2
 - Total response bytes: 600
 
-### Difference Identified
+### Batch and Streaming Alignment
 
-The producer parser rejected a malformed HTTP request, but the initial batch parser accepted it because the batch validity rule checked only the complete log format and timestamp.
+The producer parser rejected a malformed HTTP request, but the initial
+batch parser accepted it because the batch validity rule checked only
+the complete log format and timestamp.
 
-The batch parser was updated to validate the HTTP request structure as well.
+The batch parser was updated to validate the HTTP request structure.
 
-The two paths now reject the same malformed records.
-
-### Comparable Metrics
-
-The batch and streaming layers now calculate:
+The two paths now reject the same malformed records and calculate the
+same comparable metrics:
 
 - Total valid records
 - Total response bytes
@@ -198,7 +197,7 @@ The batch and streaming layers now calculate:
 
 ### Automated Comparison
 
-The following command performs the comparison:
+The comparison command is:
 
 `python -m serving.compare_controlled_window`
 
@@ -216,15 +215,83 @@ Final comparison result:
 
 `ALL COMPARABLE METRICS MATCH`
 
+### Kinesis-Triggered AWS Lambda
+
+AWS function:
+
+`scp-speed-processor-25186396`
+
+Implemented and validated:
+
+- Connected Amazon Kinesis to AWS Lambda through an event-source mapping.
+- Enabled the trigger with starting position `LATEST`.
+- Configured a batch size of 100 records.
+- Enabled `ReportBatchItemFailures`.
+- Enabled batch splitting on function errors.
+- Configured three retry attempts.
+- Decoded real Lambda Kinesis records.
+- Updated recent sliding-window analytics.
+- Detected high error-rate anomalies.
+- Logged processing summaries and anomalies in CloudWatch.
+
+Controlled AWS result:
+
+- Records sent: 2
+- Failed records: 0
+- Records received by Lambda: 2
+- Records processed: 2
+- Invalid records: 0
+- Anomalies detected: 1
+- Event-source mapping state: Enabled
+- Last processing result: OK
+
+### Speed-Layer Snapshot Persistence
+
+The Lambda now persists its latest analytics view in:
+
+`s3://scp-speed-results-25186396/speed/latest_snapshot.json`
+
+The stored document contains:
+
+- Schema version
+- Generation timestamp
+- Processing summary
+- Recent anomalies
+- Requests per endpoint
+- Error rates
+- Traffic by hour
+- Status-code distribution
+- Response-byte totals
+- Sliding-window boundaries
+
+Controlled persistence result:
+
+- Records processed: 2
+- Window event count: 2
+- Total response bytes: 400
+- HTTP 200 responses: 1
+- HTTP 500 responses: 1
+- Endpoint error rate: 0.50
+- Anomalies detected: 1
+- S3 persistence result: stored
+- Content type: application/json
+- Server-side encryption: AES256
+
+A temporary S3 failure is logged without incorrectly marking already
+processed Kinesis records as invalid.
+
 ### Automated Tests
 
-- Total tests: 26
+- Total tests: 36
 - Result: all tests passed
-- Execution time: 15.929 seconds
+- Execution time: 15.934 seconds
+
+The local Spark warnings appeared before or after the unittest output,
+but the final unittest result was `OK`.
 
 ### Evidence
 
-Human-readable evidence:
+Controlled comparison evidence:
 
 - `docs/evidence/day4/01_producer_fixture_validation.txt`
 - `docs/evidence/day4/02_batch_fixture_validation.txt`
@@ -234,14 +301,23 @@ Human-readable evidence:
 - `docs/evidence/day4/06_batch_stream_comparison_clean.txt`
 - `docs/evidence/day4/07_full_test_suite.txt`
 
+Lambda and AWS evidence:
+
+- `docs/evidence/day4/08_lambda_handler_tests.txt`
+- `docs/evidence/day4/09_full_suite_with_lambda.txt`
+- `docs/evidence/day4/10_real_kinesis_lambda_e2e.txt`
+- `docs/evidence/day4/11_full_suite_with_s3_persistence.txt`
+- `docs/evidence/day4/12_s3_snapshot_persistence_e2e.txt`
+
 Machine-readable evidence:
 
 - `results/integration/batch_stream_comparison.json`
 
-Important commit:
+Important commits:
 
 - `e8bcb14` - Validate batch and streaming analytics parity
-
+- `67aa834` - Add and validate Kinesis-triggered Lambda processing
+- `9bb4324` - Persist speed-layer snapshots in Amazon S3
 ## Current Git Status
 
 Active integration branch:
@@ -250,7 +326,7 @@ Active integration branch:
 
 Latest integration commit:
 
-- `e8bcb14` - Validate batch and streaming analytics parity
+- `9bb4324` - Persist speed-layer snapshots in Amazon S3
 
 Pull Request:
 
@@ -260,10 +336,12 @@ Pull Request:
 - Status: Draft
 - Merge conflicts: none
 - Review requested from Nalini
-- Merge must wait for confirmation of the latest EMR setup, benchmark configuration and AWS evidence
+- Merge must wait for confirmation of the latest EMR setup, benchmark
+  configuration and AWS evidence.
 
-The older `nalini-batch-layer` branch must not be merged directly because its work has already been incorporated and reorganised in the integration branch.
-
+The older `nalini-batch-layer` branch must not be merged directly
+because its work has already been incorporated and reorganised in the
+integration branch.
 ## Local Spark Warnings
 
 Local Spark execution on Windows may show warnings relating to:
@@ -281,10 +359,13 @@ These warnings do not invalidate successful test results when the unittest summa
 - [ ] Receive Nalini's review of PR #3
 - [ ] Confirm the latest EMR commands and benchmark configuration
 - [ ] Collect remaining EMR, S3 and auto-scaling screenshots
-- [ ] Add a Kinesis-triggered AWS Lambda handler
-- [ ] Document the Kinesis event-source mapping
+- [x] Add a Kinesis-triggered AWS Lambda handler
+- [x] Document the Kinesis event-source mapping
+- [x] Persist the latest speed-layer snapshot in Amazon S3
 - [ ] Add the serving-layer comparison between historical baseline and recent traffic
 - [ ] Add or document Athena queries over batch results in Amazon S3
+- [ ] Run benchmarks with multiple controlled traffic volumes
+- [ ] Produce final benchmark graphs
 - [ ] Update the architecture diagram
 - [ ] Update the README with final execution instructions
 - [ ] Prepare the technical report
@@ -293,11 +374,14 @@ These warnings do not invalidate successful test results when the unittest summa
 - [ ] Mark PR #3 as ready for review
 - [ ] Merge PR #3 into `main`
 - [ ] Confirm that `main` is clean and deployable
-
 ## Current Priority
 
-While waiting for the batch-layer review, the next independent technical task is:
+Day 4 is complete.
 
-`Kinesis Data Streams -> Lambda event-source mapping -> speed/lambda_handler.py`
+The next independent technical task is the serving layer:
 
-This will replace manual polling as the main AWS event-processing pattern while preserving the existing parser, consumer and sliding-window analytics.
+`Amazon S3 batch results + speed/latest_snapshot.json -> combined serving view`
+
+The serving layer should read the recent speed-layer snapshot, load the
+historical batch baseline when available and expose a clear comparison
+between recent and historical traffic.
