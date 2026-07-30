@@ -1,0 +1,19 @@
+﻿=== S3 OBJECT METADATA ===
+{
+    "AcceptRanges": "bytes",
+    "LastModified": "2026-07-30T21:18:54+00:00",
+    "ContentLength": 844,
+    "ETag": "\"6748773fa7339bb0d11ea6bfc708fe1c\"",
+    "ContentType": "application/json",
+    "ServerSideEncryption": "AES256",
+    "Metadata": {}
+}
+
+=== STORED SPEED SNAPSHOT ===
+{"anomalies":[{"endpoint":"/api/persistence-test","error_count":1,"error_rate":0.5,"reason":"recent error rate reached the configured threshold","total_requests":2}],"generated_at":"2026-07-30T21:18:51.865239+00:00","layer":"speed","schema_version":1,"snapshot":{"error_rates":{"/api/persistence-test":{"error_count":1,"error_rate":0.5,"total_requests":2}},"requests_per_endpoint":{"/api/persistence-test":2},"response_byte_totals":{"/api/persistence-test":400},"status_code_distribution":{"200":1,"500":1},"total_response_bytes":400,"total_valid_records":2,"traffic_by_hour":{"21":2},"window_end":"2026-07-30T21:18:50.776450+00:00","window_event_count":2,"window_seconds":300,"window_start":"2026-07-30T21:13:50.776450+00:00"},"summary":{"anomaly_count":1,"invalid_records":0,"processed_records":2,"received_records":2,"window_event_count":2}}
+
+=== CLOUDWATCH PERSISTENCE LOGS ===
+2026-07-30T21:18:53 [INFO]	2026-07-30T21:18:53.294Z	997111cd-018c-42d0-a1e0-83778373dc0d	Speed-layer snapshot persistence: {"bucket": "scp-speed-results-25186396", "bytes_written": 844, "enabled": true, "etag": "\"6748773fa7339bb0d11ea6bfc708fe1c\"", "key": "speed/latest_snapshot.json", "stored": true}
+2026-07-30T21:18:53 [INFO]	2026-07-30T21:18:53.295Z	997111cd-018c-42d0-a1e0-83778373dc0d	Kinesis Lambda batch result: {"anomaly_count": 1, "invalid_records": 0, "processed_records": 2, "received_records": 2, "window_event_count": 2}
+2026-07-30T21:18:53 [WARNING]	2026-07-30T21:18:53.295Z	997111cd-018c-42d0-a1e0-83778373dc0d	Anomaly detected: {"endpoint": "/api/persistence-test", "error_count": 1, "error_rate": 0.5, "reason": "recent error rate reached the configured threshold", "total_requests": 2}
+2026-07-30T21:18:53 REPORT RequestId: 997111cd-018c-42d0-a1e0-83778373dc0d	Duration: 1431.99 ms	Billed Duration: 1738 ms	Memory Size: 256 MB	Max Memory Used: 95 MB	Init Duration: 305.91 ms

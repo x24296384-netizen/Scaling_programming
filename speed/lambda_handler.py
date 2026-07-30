@@ -11,6 +11,7 @@ Kinesis record
     -> event validation
     -> sliding-window analytics
     -> anomaly detection
+    -> S3 latest-snapshot persistence
     -> partial-batch response
 """
 
@@ -23,6 +24,7 @@ import logging
 import os
 from typing import Any
 
+from speed.snapshot_store import persist_speed_snapshot
 from speed.stream_consumer import process_kinesis_record
 from speed.window_analytics import SlidingWindowAnalytics
 
@@ -345,9 +347,9 @@ def lambda_handler(
     Valid records update the sliding-window analytics.
     Invalid records are counted and reported individually.
 
-    Returning `batchItemFailures` allows Lambda to retry only failed
-    records when partial-batch failure reporting is enabled in the
-    Kinesis event-source mapping.
+    Returning `batchItemFailures` identifies failed sequence numbers.
+    For Kinesis, Lambda uses the lowest reported sequence number as
+    the retry checkpoint when partial-batch reporting is enabled.
     """
 
     # The Lambda context is currently unnecessary, but it remains in
@@ -477,6 +479,46 @@ def lambda_handler(
         "anomalies": anomalies,
         "snapshot": snapshot,
     }
+
+    # Store the latest speed-layer view for the serving layer.
+    #
+    # Persistence is deliberately isolated from Kinesis record
+    # acknowledgement. A temporary S3 failure is logged, but records
+    # that were already processed are not reported as invalid.
+    try:
+        persistence = persist_speed_snapshot(
+            summary=result["summary"],
+            anomalies=anomalies,
+            snapshot=snapshot,
+        )
+    except Exception as exc:
+        LOGGER.exception(
+            "Speed-layer snapshot persistence failed: %s",
+            exc,
+        )
+
+        persistence = {
+            "enabled": True,
+            "stored": False,
+            "bucket": os.getenv(
+                "SPEED_RESULTS_BUCKET"
+            ),
+            "key": os.getenv(
+                "SPEED_RESULTS_KEY",
+                "speed/latest_snapshot.json",
+            ),
+            "reason": type(exc).__name__,
+        }
+
+    result["persistence"] = persistence
+
+    LOGGER.info(
+        "Speed-layer snapshot persistence: %s",
+        json.dumps(
+            persistence,
+            sort_keys=True,
+        ),
+    )
 
     # This summary becomes visible in CloudWatch Logs after deployment.
     LOGGER.info(

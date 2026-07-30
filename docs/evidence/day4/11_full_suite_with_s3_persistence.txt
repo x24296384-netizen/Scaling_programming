@@ -1,0 +1,289 @@
+python : 26/07/30 22:14:27 WARN Shell:
+Did not find winutils.exe:
+java.io.FileNotFoundException:
+java.io.FileNotFoundException:
+HADOOP_HOME and hadoop.home.dir are
+unset. -see https://wiki.apache.org/hadoop
+/WindowsProblems
+At line:1 char:1
++ python -m unittest discover `
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecifie
+   d: (26/07/30 22:14:...WindowsProblems
+  :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeComma
+   ndError
+
+Setting default log level to "WARN".
+To adjust logging level use
+sc.setLogLevel(newLevel). For SparkR, use
+setLogLevel(newLevel).
+26/07/30 22:14:27 WARN NativeCodeLoader:
+Unable to load native-hadoop library for
+your platform... using builtin-java
+classes where applicable
+test_batch_metrics_are_correct (test_batch
+_job.TestBatchLogParser.test_batch_metrics
+_are_correct)
+Historical metrics should match the
+sample log contents. ...
+[Stage 0:>
+                          (0 + 1) / 1]
+
+
+
+C:\Users\maryh\AppData\Local\Programs\Pyth
+on\Python311\Lib\socket.py:777:
+ResourceWarning: unclosed <socket.socket
+fd=672, family=2, type=1, proto=0,
+laddr=('127.0.0.1', 52887),
+raddr=('127.0.0.1', 52886)>
+  self._sock = None
+ResourceWarning: Enable tracemalloc to
+get the object allocation traceback
+C:\Users\maryh\AppData\Local\Programs\Pyth
+on\Python311\Lib\socket.py:777:
+ResourceWarning: unclosed <socket.socket
+fd=716, family=2, type=1, proto=0,
+laddr=('127.0.0.1', 52889),
+raddr=('127.0.0.1', 52888)>
+  self._sock = None
+ResourceWarning: Enable tracemalloc to
+get the object allocation traceback
+C:\Users\maryh\AppData\Local\Programs\Pyth
+on\Python311\Lib\socket.py:777:
+ResourceWarning: unclosed <socket.socket
+fd=868, family=2, type=1, proto=0,
+laddr=('127.0.0.1', 52891),
+raddr=('127.0.0.1', 52890)>
+  self._sock = None
+ResourceWarning: Enable tracemalloc to
+get the object allocation traceback
+C:\Users\maryh\AppData\Local\Programs\Pyth
+on\Python311\Lib\socket.py:777:
+ResourceWarning: unclosed <socket.socket
+fd=892, family=2, type=1, proto=0,
+laddr=('127.0.0.1', 54222),
+raddr=('127.0.0.1', 54221)>
+  self._sock = None
+ResourceWarning: Enable tracemalloc to
+get the object allocation traceback
+ok
+test_data_quality_counts_valid_and_invalid
+_records (test_batch_job.TestBatchLogParse
+r.test_data_quality_counts_valid_and_inval
+id_records)
+Data-quality metrics should explain
+rejected log records. ... C:\Users\maryh\A
+ppData\Local\Programs\Python\Python311\Lib
+\socket.py:777: ResourceWarning: unclosed
+<socket.socket fd=836, family=2, type=1,
+proto=0, laddr=('127.0.0.1', 54224),
+raddr=('127.0.0.1', 54223)>
+  self._sock = None
+ResourceWarning: Enable tracemalloc to
+get the object allocation traceback
+ok
+test_parser_uses_official_schema_and_utc (
+test_batch_job.TestBatchLogParser.test_par
+ser_uses_official_schema_and_utc)
+Batch parsing should match the producer
+and normalise time to UTC. ... C:\Users\ma
+ryh\AppData\Local\Programs\Python\Python31
+1\Lib\socket.py:777: ResourceWarning:
+unclosed <socket.socket fd=840, family=2,
+type=1, proto=0, laddr=('127.0.0.1',
+54226), raddr=('127.0.0.1', 54225)>
+  self._sock = None
+ResourceWarning: Enable tracemalloc to
+get the object allocation traceback
+C:\Users\maryh\AppData\Local\Programs\Pyth
+on\Python311\Lib\socket.py:777:
+ResourceWarning: unclosed <socket.socket
+fd=716, family=2, type=1, proto=0,
+laddr=('127.0.0.1', 54228),
+raddr=('127.0.0.1', 54227)>
+  self._sock = None
+ResourceWarning: Enable tracemalloc to
+get the object allocation traceback
+ok
+test_missing_shard_is_reported (test_kines
+is_reader.TestKinesisReader.test_missing_s
+hard_is_reported)
+A stream without shards should raise a
+clear error. ... ok
+test_reader_retries_empty_response_and_ret
+urns_records (test_kinesis_reader.TestKine
+sisReader.test_reader_retries_empty_respon
+se_and_returns_records)
+The reader should continue after an empty
+response. ... ok
+test_handler_processes_valid_batch (test_l
+ambda_handler.TestLambdaHandler.test_handl
+er_processes_valid_batch)
+Valid Kinesis records should update the
+window. ... ok
+test_high_error_rate_creates_anomaly (test
+_lambda_handler.TestLambdaHandler.test_hig
+h_error_rate_creates_anomaly)
+Repeated failures should create an
+endpoint anomaly. ... Anomaly detected:
+{"endpoint": "/api/login", "error_count":
+2, "error_rate": 1.0, "reason": "recent
+error rate reached the configured
+threshold", "total_requests": 2}
+ok
+test_invalid_event_fields_are_reported (te
+st_lambda_handler.TestLambdaHandler.test_i
+nvalid_event_fields_are_reported)
+Valid JSON with missing fields should
+still fail safely. ... ok
+test_invalid_record_is_reported_without_st
+opping_batch (test_lambda_handler.TestLamb
+daHandler.test_invalid_record_is_reported_
+without_stopping_batch)
+One malformed record should not block
+valid records. ... ok
+test_lambda_record_is_converted_for_consum
+er (test_lambda_handler.TestLambdaHandler.
+test_lambda_record_is_converted_for_consum
+er)
+Base64 Lambda data should become consumer
+bytes. ... ok
+test_handler_attaches_persistence_result (
+test_lambda_snapshot_integration.TestLambd
+aSnapshotIntegration.test_handler_attaches
+_persistence_result) ... ok
+test_s3_failure_does_not_fail_kinesis_batc
+h (test_lambda_snapshot_integration.TestLa
+mbdaSnapshotIntegration.test_s3_failure_do
+es_not_fail_kinesis_batch) ... ok
+test_invalid_log_line (test_parser.TestLog
+Parser.test_invalid_log_line)
+An invalid line should return None
+without stopping processing. ... ok
+test_invalid_timestamp_returns_none (test_
+parser.TestLogParser.test_invalid_timestam
+p_returns_none)
+A malformed timestamp should be rejected
+without stopping replay. ... ok
+test_valid_log_line (test_parser.TestLogPa
+rser.test_valid_log_line)
+Test parsing a valid log line. ... ok
+test_build_kinesis_record (test_replay_log
+s.TestReplayLogs.test_build_kinesis_record
+)
+A parsed event should become a valid
+Kinesis record. ... ok
+test_failed_record_is_retried (test_replay
+_logs.TestReplayLogs.test_failed_record_is
+_retried)
+Only failed records should be sent again.
+... ok
+test_permanent_failure_is_reported (test_r
+eplay_logs.TestReplayLogs.test_permanent_f
+ailure_is_reported)
+Records that fail after all retries
+should be reported. ... ok
+test_prepare_records_skips_invalid_lines (
+test_replay_logs.TestReplayLogs.test_prepa
+re_records_skips_invalid_lines)
+Valid log lines become records while
+invalid lines are counted. ... ok
+test_replay_file_reads_fixture_and_sends_r
+ecords (test_replay_logs.TestReplayLogs.te
+st_replay_file_reads_fixture_and_sends_rec
+ords)
+The fixture file should be read and sent
+in two batches. ... ok
+test_replay_lines_sends_multiple_batches (
+test_replay_logs.TestReplayLogs.test_repla
+y_lines_sends_multiple_batches)
+Three valid lines with batch size two
+should create two batches. ... ok
+test_missing_bucket_skips_aws_write (test_
+snapshot_store.TestSnapshotStore.test_miss
+ing_bucket_skips_aws_write) ... ok
+test_snapshot_document_has_stable_schema (
+test_snapshot_store.TestSnapshotStore.test
+_snapshot_document_has_stable_schema) ...
+ok
+test_snapshot_is_written_as_json (test_sna
+pshot_store.TestSnapshotStore.test_snapsho
+t_is_written_as_json) ... ok
+test_decode_valid_kinesis_record (test_str
+eam_consumer.TestStreamConsumer.test_decod
+e_valid_kinesis_record)
+A valid Kinesis payload should become a
+Python dictionary. ... ok
+test_invalid_json_returns_none (test_strea
+m_consumer.TestStreamConsumer.test_invalid
+_json_returns_none)
+Malformed JSON should be rejected without
+stopping the consumer. ... ok
+test_process_record_updates_sliding_window
+ (test_stream_consumer.TestStreamConsumer.
+test_process_record_updates_sliding_window
+)
+A valid record should update the
+incremental analytics. ... ok
+test_benchmark_records_calculates_counts_a
+nd_performance (test_stream_metrics.TestSt
+reamMetrics.test_benchmark_records_calcula
+tes_counts_and_performance)
+Counts, throughput and latency should be
+calculated correctly. ... ok
+test_fixture_records_reach_sliding_window
+(test_stream_pipeline.TestLocalStreamPipel
+ine.test_fixture_records_reach_sliding_win
+dow)
+Real fixture lines should pass through
+the complete local path. ... ok
+test_empty_window_snapshot (test_window_an
+alytics.TestSlidingWindowAnalytics.test_em
+pty_window_snapshot)
+A new window should contain no events or
+time boundaries. ... ok
+test_event_older_than_window_is_discarded
+(test_window_analytics.TestSlidingWindowAn
+alytics.test_event_older_than_window_is_di
+scarded)
+An event older than the current cutoff
+should not remain. ... ok
+test_incremental_metrics_and_window_evicti
+on (test_window_analytics.TestSlidingWindo
+wAnalytics.test_incremental_metrics_and_wi
+ndow_eviction)
+Metrics should update and expired events
+should be removed. ... ok
+test_invalid_window_and_event_values_are_r
+ejected (test_window_analytics.TestSliding
+WindowAnalytics.test_invalid_window_and_ev
+ent_values_are_rejected)
+Invalid configuration or event fields
+should raise ValueError. ... ok
+test_out_of_order_event_inside_window_is_r
+etained (test_window_analytics.TestSliding
+WindowAnalytics.test_out_of_order_event_in
+side_window_is_retained)
+A late event should remain when it is
+still inside the window. ... ok
+test_response_byte_metrics_follow_window_e
+viction (test_window_analytics.TestSliding
+WindowAnalytics.test_response_byte_metrics
+_follow_window_eviction)
+Response-byte totals should update when
+events expire. ... ok
+test_window_lower_boundary_is_inclusive (t
+est_window_analytics.TestSlidingWindowAnal
+ytics.test_window_lower_boundary_is_inclus
+ive)
+An event exactly at the cutoff should
+remain in the window. ... ok
+
+------------------------------------------
+----------------------------
+Ran 36 tests in 15.934s
+
+OK
+ERROR: The process "36076" not found.
