@@ -1,0 +1,80 @@
+{
+  "benchmark_type": "real_kinesis_smoke_test",
+  "stream_name": "scp-access-log-stream-25186396",
+  "region": "us-east-1",
+  "shard_id": "shardId-000000000000",
+  "iterator_type": "LATEST",
+  "input_file": "tests/fixtures/sample_access.log",
+  "complete_runtime_seconds": 0.30739,
+  "producer": {
+    "total_lines": 3,
+    "valid_records": 3,
+    "invalid_lines": 0,
+    "successful_records": 3,
+    "failed_records": 0,
+    "batches_sent": 1
+  },
+  "reader": {
+    "records_received": 3,
+    "read_attempts": 1,
+    "read_wait_seconds": 0.155758
+  },
+  "consumer": {
+    "records_attempted": 3,
+    "records_processed": 3,
+    "invalid_records": 0,
+    "local_processing_runtime_seconds": 0.000117,
+    "local_processing_throughput_records_per_second": 25641.021744
+  },
+  "end_to_end_latency": {
+    "definition": "Time from producer ingested_at to completion of consumer sliding-window processing. It includes PutRecords, Kinesis availability, polling, JSON decoding and window analytics.",
+    "samples": 3,
+    "minimum_ms": 300.444,
+    "mean_ms": 300.444,
+    "p50_ms": 300.444,
+    "p95_ms": 300.444,
+    "maximum_ms": 300.444
+  },
+  "event_validation": {
+    "decoded_events": 3,
+    "event_ids_present": true,
+    "sources": [
+      "nginx_access_log"
+    ],
+    "endpoints": [
+      "/filter/test",
+      "/api/login",
+      "/images/logo.png"
+    ]
+  },
+  "window": {
+    "event_count": 3,
+    "requests_per_endpoint": {
+      "/filter/test": 1,
+      "/api/login": 1,
+      "/images/logo.png": 1
+    },
+    "error_rates": {
+      "/api/login": {
+        "total_requests": 1,
+        "error_count": 1,
+        "error_rate": 1.0
+      },
+      "/filter/test": {
+        "total_requests": 1,
+        "error_count": 0,
+        "error_rate": 0.0
+      },
+      "/images/logo.png": {
+        "total_requests": 1,
+        "error_count": 0,
+        "error_rate": 0.0
+      }
+    },
+    "status_code_distribution": {
+      "200": 1,
+      "500": 1,
+      "304": 1
+    }
+  }
+}

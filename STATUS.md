@@ -270,3 +270,74 @@ Screenshots must not expose AWS access keys, secret keys or session tokens.
 - [ ] Measure speed-layer latency and throughput
 - [ ] Run an initial test against an Amazon Kinesis stream
 - [ ] Save final Day 2 screenshots and logs in the shared OneDrive folder
+## Day 3 - Speed Layer completed
+
+### Implementation
+
+- Added event-time sliding-window analytics with incremental eviction.
+- Added requests per endpoint, traffic by hour, error rates and HTTP status-code distribution.
+- Added a local Kinesis-style consumer with invalid JSON handling.
+- Added reusable Amazon Kinesis shard discovery, shard iterator and record-reading logic.
+- Added deterministic throughput and latency metric tests.
+- Added local full-dataset and real AWS Kinesis benchmark scripts.
+
+### Automated validation
+
+- 22 real-time unit and integration tests passed.
+- Parser, producer replay, retry handling, consumer, sliding window, performance metrics and Kinesis reader were validated.
+- Local fixture integration confirmed the path from raw Nginx lines to incremental analytics.
+
+### Full local streaming benchmark
+
+Dataset:
+
+- Kaggle Web Server Access Logs
+- Dataset size: 3,502,440,823 bytes
+- Total lines: 10,365,152
+- Valid records: 10,365,077
+- Invalid lines: 75
+- Failed records: 0
+
+Measured results:
+
+- Runtime: 352.8049 seconds
+- Throughput: 29,379.27 lines per second
+- Valid-record throughput: 29,379.06 records per second
+- Local sampled latency mean: 0.0351 ms
+- Local sampled latency p95: 0.06968 ms
+
+The local latency measures raw-line parsing, Kinesis-style JSON creation,
+consumer decoding and sliding-window analytics. It excludes AWS network and
+Amazon Kinesis service latency.
+
+### Real Amazon Kinesis validation
+
+Stream configuration:
+
+- Mode: PROVISIONED
+- Open shards: 1
+- Retention: 24 hours
+
+Real smoke test:
+
+- Records sent: 3
+- Records received: 3
+- Records processed: 3
+- Invalid records: 0
+- Failed records: 0
+- Read attempts: 1
+- Complete runtime: 0.30739 seconds
+- Measured end-to-end latency: 300.444 ms
+
+The end-to-end measurement includes PutRecords, Amazon Kinesis availability,
+polling, JSON decoding and sliding-window processing.
+
+Because the real AWS test used only three controlled events, it demonstrates
+functional integration and observed latency rather than maximum Kinesis
+throughput or production-scale capacity.
+
+### Day 3 status
+
+Day 3 is technically complete. The Speed Layer has been implemented, tested,
+benchmarked locally on the complete dataset and validated end-to-end using a
+real Amazon Kinesis Data Stream.
