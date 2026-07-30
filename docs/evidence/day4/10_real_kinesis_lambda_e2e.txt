@@ -1,0 +1,34 @@
+=== REAL KINESIS SEND ===
+records_sent: 2
+failed_record_count: 0
+record_1_sequence_number: 49676901565035965343838826707607748250104362568878391298
+record_1_shard_id: shardId-000000000000
+record_2_sequence_number: 49676901565035965343838826707608957175923977198053097474
+record_2_shard_id: shardId-000000000000
+
+=== CLOUDWATCH LAMBDA LOGS ===
+2026-07-30T19:04:39 INIT_START Runtime Version: python:3.11.mainlinev2.v27	Runtime Version ARN: arn:aws:lambda:us-east-1::runtime:81a2f2bcc7b606f63601c58153453037785e00ca30d21476cee5f82df01b0d71
+2026-07-30T19:04:39 START RequestId: 134cce7b-aa8b-4018-8844-ea07db6ef5e6 Version: $LATEST
+2026-07-30T19:04:39 [INFO]	2026-07-30T19:04:39.360Z	134cce7b-aa8b-4018-8844-ea07db6ef5e6	Kinesis Lambda batch result: {"anomaly_count": 1, "invalid_records": 0, "processed_records": 2, "received_records": 2, "window_event_count": 2}
+2026-07-30T19:04:39 [WARNING]	2026-07-30T19:04:39.361Z	134cce7b-aa8b-4018-8844-ea07db6ef5e6	Anomaly detected: {"endpoint": "/api/login", "error_count": 2, "error_rate": 1.0, "reason": "recent error rate reached the configured threshold", "total_requests": 2}
+2026-07-30T19:04:39 END RequestId: 134cce7b-aa8b-4018-8844-ea07db6ef5e6
+2026-07-30T19:04:39 REPORT RequestId: 134cce7b-aa8b-4018-8844-ea07db6ef5e6	Duration: 1.78 ms	Billed Duration: 100 ms	Memory Size: 256 MB	Max Memory Used: 37 MB	Init Duration: 97.45 ms
+2026-07-30T19:12:35 INIT_START Runtime Version: python:3.11.mainlinev2.v27	Runtime Version ARN: arn:aws:lambda:us-east-1::runtime:81a2f2bcc7b606f63601c58153453037785e00ca30d21476cee5f82df01b0d71
+2026-07-30T19:12:35 START RequestId: 8b3ca1af-76aa-4d3d-a63e-c2f8eaf6ae6d Version: $LATEST
+2026-07-30T19:12:35 [INFO]	2026-07-30T19:12:35.549Z	8b3ca1af-76aa-4d3d-a63e-c2f8eaf6ae6d	Kinesis Lambda batch result: {"anomaly_count": 1, "invalid_records": 0, "processed_records": 2, "received_records": 2, "window_event_count": 2}
+2026-07-30T19:12:35 [WARNING]	2026-07-30T19:12:35.549Z	8b3ca1af-76aa-4d3d-a63e-c2f8eaf6ae6d	Anomaly detected: {"endpoint": "/api/login", "error_count": 2, "error_rate": 1.0, "reason": "recent error rate reached the configured threshold", "total_requests": 2}
+2026-07-30T19:12:35 END RequestId: 8b3ca1af-76aa-4d3d-a63e-c2f8eaf6ae6d
+2026-07-30T19:12:35 REPORT RequestId: 8b3ca1af-76aa-4d3d-a63e-c2f8eaf6ae6d	Duration: 2.05 ms	Billed Duration: 118 ms	Memory Size: 256 MB	Max Memory Used: 37 MB	Init Duration: 115.67 ms
+
+=== EVENT SOURCE MAPPING ===
+----------------------------------------------
+|           ListEventSourceMappings          |
++------------+---------+---------+-----------+
+|  BatchSize | Result  |  Start  |   State   |
++------------+---------+---------+-----------+
+|  100       |  OK     |  LATEST |  Enabled  |
++------------+---------+---------+-----------+
+||               ResponseTypes              ||
+|+------------------------------------------+|
+||  ReportBatchItemFailures                 ||
+|+------------------------------------------+|

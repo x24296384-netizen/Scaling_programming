@@ -1,0 +1,16 @@
+test_handler_processes_valid_batch (tests.test_lambda_handler.TestLambdaHandler.test_handler_processes_valid_batch)
+Valid Kinesis records should update the window. ... ok
+test_high_error_rate_creates_anomaly (tests.test_lambda_handler.TestLambdaHandler.test_high_error_rate_creates_anomaly)
+Repeated failures should create an endpoint anomaly. ... Anomaly detected: {"endpoint": "/api/login", "error_count": 2, "error_rate": 1.0, "reason": "recent error rate reached the configured threshold", "total_requests": 2}
+ok
+test_invalid_event_fields_are_reported (tests.test_lambda_handler.TestLambdaHandler.test_invalid_event_fields_are_reported)
+Valid JSON with missing fields should still fail safely. ... ok
+test_invalid_record_is_reported_without_stopping_batch (tests.test_lambda_handler.TestLambdaHandler.test_invalid_record_is_reported_without_stopping_batch)
+One malformed record should not block valid records. ... ok
+test_lambda_record_is_converted_for_consumer (tests.test_lambda_handler.TestLambdaHandler.test_lambda_record_is_converted_for_consumer)
+Base64 Lambda data should become consumer bytes. ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.002s
+
+OK
