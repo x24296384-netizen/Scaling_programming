@@ -28,6 +28,7 @@ CLUSTER_ID=$(aws emr create-cluster \
   --log-uri "$S3_LOGS_BUCKET" \
   --ec2-attributes KeyName="$KEY_PAIR",SubnetId="$SUBNET_ID" \
   --service-role EMR_DefaultRole \
+  --auto-scaling-role EMR_AutoScaling_DefaultRole \
   --instance-groups '[
     {
       "InstanceGroupType":"MASTER",
