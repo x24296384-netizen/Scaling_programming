@@ -1,4 +1,4 @@
-﻿"""Benchmark Kinesis-to-Lambda-to-S3 processing under controlled loads.
+"""Benchmark Kinesis-to-Lambda-to-S3 processing under controlled loads.
 
 Each benchmark run uses a unique endpoint. The script sends synthetic
 web-log events to Kinesis and polls the speed-layer S3 snapshot until
@@ -32,7 +32,7 @@ DEFAULT_STREAM = "scp-access-log-stream-25186396"
 DEFAULT_BUCKET = "scp-speed-results-25186396"
 DEFAULT_KEY = "speed/latest_snapshot.json"
 DEFAULT_OUTPUT = (
-    "results/benchmark/"
+    "results/speed/benchmarks/"
     "lambda_s3_multi_load.json"
 )
 
