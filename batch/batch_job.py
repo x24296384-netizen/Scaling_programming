@@ -60,6 +60,7 @@ def _parse_raw_data(spark, input_path):
     raw = spark.read.text(input_path)
 
     parsed = raw.select(
+        F.col("value").alias("raw_line"),
         F.regexp_extract("value", LOG_PATTERN, 1).alias("client_ip"),
         F.regexp_extract("value", LOG_PATTERN, 2).alias("timestamp_raw"),
         F.regexp_extract("value", LOG_PATTERN, 3).alias("request_raw"),
@@ -252,13 +253,32 @@ def read_raw_data_with_quality(spark, input_path):
         "invalid_percentage": invalid_percentage,
     }
 
+    # Build a rejected-records view with a precise rejection reason,
+    # using the same format/timestamp/request checks as the quality
+    # summary above, plus the original raw line for inspection.
+    rejected_df = (
+        parsed
+        .filter(
+            ~(F.col("format_valid") & F.col("timestamp_valid") & F.col("request_valid"))
+        )
+        .withColumn(
+            "rejection_reason",
+            F.when(~F.col("format_valid"), "invalid_format")
+             .when(~F.col("timestamp_valid"), "invalid_timestamp")
+             .otherwise("invalid_request"),
+        )
+        .select("raw_line", "rejection_reason")
+        .cache()
+    )
+
     # Materialise and cache valid records before releasing the larger
     # intermediate DataFrame.
     valid_df = _select_valid_records(parsed).cache()
     valid_df.count()
+    rejected_df.count()
     parsed.unpersist()
 
-    return valid_df, quality
+    return valid_df, quality, rejected_df
 
 
 def compute_batch_metrics(df):
@@ -392,6 +412,28 @@ def write_results(results, output_path):
         )
 
 
+def write_rejected_evidence(rejected_df, output_path):
+    """
+    Writes (1) a breakdown of rejected lines by precise reason
+    (invalid_format / invalid_timestamp / invalid_request), and (2) a
+    sample of 20 actual rejected raw lines — requested by Mary Helen to
+    compare against the streaming parser's rejection rules.
+    """
+    breakdown = (
+        rejected_df.groupBy("rejection_reason")
+        .agg(F.count("*").alias("count"))
+        .orderBy(F.desc("count"))
+    )
+    breakdown.coalesce(1).write.mode("overwrite").option("header", "true").csv(
+        f"{output_path}/rejected_breakdown"
+    )
+
+    sample = rejected_df.limit(20)
+    sample.coalesce(1).write.mode("overwrite").option("header", "true").csv(
+        f"{output_path}/rejected_sample"
+    )
+
+
 def main():
     parser = argparse.ArgumentParser()
 
@@ -423,7 +465,7 @@ def main():
     start_time = time.time()
 
     # Read valid records and collect information about rejected lines.
-    df, quality = read_raw_data_with_quality(
+    df, quality, rejected_df = read_raw_data_with_quality(
         spark,
         args.input,
     )
@@ -455,6 +497,7 @@ def main():
     # Calculate and save the historical batch-layer results.
     results = compute_batch_metrics(df)
     write_results(results, args.output)
+    write_rejected_evidence(rejected_df, args.output)
 
     elapsed = time.time() - start_time
 
