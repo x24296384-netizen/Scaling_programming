@@ -1,0 +1,90 @@
+=== 1,000-RECORD LOAD FINDING ===
+
+Requested records: 1000
+Successful producer records: 1000
+Producer failures: 0
+Final single-snapshot count: 500
+Benchmark completion: False
+
+CloudWatch showed ten Lambda batches of 100 records.
+
+One execution environment continued an existing window from 600
+to 1100, processing 500 records from the new load.
+
+A second execution environment started with a cold initialisation
+and accumulated 100, 200, 300, 400 and 500 records.
+
+Both environments wrote to speed/latest_snapshot.json. The final
+write contained the second environment's local count of 500.
+
+Conclusion:
+All 1000 records were processed, but the single S3 snapshot was not
+a globally shared aggregation across Lambda execution environments.
+
+=== CLOUDWATCH LOGS ===
+2026-07-31T02:13:05 INIT_START Runtime Version: python:3.11.mainlinev2.v27	Runtime Version ARN: arn:aws:lambda:us-east-1::runtime:81a2f2bcc7b606f63601c58153453037785e00ca30d21476cee5f82df01b0d71
+2026-07-31T02:13:05 START RequestId: a01bfe1c-8cdb-4e14-89bb-9b0d59b94ea9 Version: $LATEST
+2026-07-31T02:13:07 [INFO]	2026-07-31T02:13:07.119Z	a01bfe1c-8cdb-4e14-89bb-9b0d59b94ea9	Speed-layer snapshot persistence: {"bucket": "scp-speed-results-25186396", "bytes_written": 799, "enabled": true, "etag": "\"2e990fbef92eedc768fa6c2e215f466a\"", "key": "speed/latest_snapshot.json", "stored": true}
+2026-07-31T02:13:07 [INFO]	2026-07-31T02:13:07.119Z	a01bfe1c-8cdb-4e14-89bb-9b0d59b94ea9	Kinesis Lambda batch result: {"anomaly_count": 0, "invalid_records": 0, "processed_records": 100, "received_records": 100, "window_event_count": 100}
+2026-07-31T02:13:07 REPORT RequestId: a01bfe1c-8cdb-4e14-89bb-9b0d59b94ea9	Duration: 1606.35 ms	Billed Duration: 1945 ms	Memory Size: 256 MB	Max Memory Used: 96 MB	Init Duration: 338.14 ms
+2026-07-31T02:14:49 START RequestId: efc42818-d44d-41e7-997f-e53f3f55719f Version: $LATEST
+2026-07-31T02:14:50 [INFO]	2026-07-31T02:14:50.182Z	efc42818-d44d-41e7-997f-e53f3f55719f	Speed-layer snapshot persistence: {"bucket": "scp-speed-results-25186396", "bytes_written": 1024, "enabled": true, "etag": "\"8069e6d9a740988600cb9580698415fe\"", "key": "speed/latest_snapshot.json", "stored": true}
+2026-07-31T02:14:50 [INFO]	2026-07-31T02:14:50.182Z	efc42818-d44d-41e7-997f-e53f3f55719f	Kinesis Lambda batch result: {"anomaly_count": 0, "invalid_records": 0, "processed_records": 100, "received_records": 100, "window_event_count": 200}
+2026-07-31T02:14:50 REPORT RequestId: efc42818-d44d-41e7-997f-e53f3f55719f	Duration: 222.91 ms	Billed Duration: 223 ms	Memory Size: 256 MB	Max Memory Used: 96 MB
+2026-07-31T02:14:50 START RequestId: 9538c1c2-b8e3-47f9-806b-4f9af31edd59 Version: $LATEST
+2026-07-31T02:14:50 [INFO]	2026-07-31T02:14:50.377Z	9538c1c2-b8e3-47f9-806b-4f9af31edd59	Speed-layer snapshot persistence: {"bucket": "scp-speed-results-25186396", "bytes_written": 1025, "enabled": true, "etag": "\"4c943aa821857fc4ba381a2e6036028a\"", "key": "speed/latest_snapshot.json", "stored": true}
+2026-07-31T02:14:50 [INFO]	2026-07-31T02:14:50.378Z	9538c1c2-b8e3-47f9-806b-4f9af31edd59	Kinesis Lambda batch result: {"anomaly_count": 0, "invalid_records": 0, "processed_records": 100, "received_records": 100, "window_event_count": 300}
+2026-07-31T02:14:50 REPORT RequestId: 9538c1c2-b8e3-47f9-806b-4f9af31edd59	Duration: 180.52 ms	Billed Duration: 181 ms	Memory Size: 256 MB	Max Memory Used: 96 MB
+2026-07-31T02:14:50 START RequestId: cfe93181-67ab-4a3e-9877-de52890cef00 Version: $LATEST
+2026-07-31T02:14:50 [INFO]	2026-07-31T02:14:50.576Z	cfe93181-67ab-4a3e-9877-de52890cef00	Speed-layer snapshot persistence: {"bucket": "scp-speed-results-25186396", "bytes_written": 1025, "enabled": true, "etag": "\"88a0320db2e18027642656cd38e3965b\"", "key": "speed/latest_snapshot.json", "stored": true}
+2026-07-31T02:14:50 [INFO]	2026-07-31T02:14:50.576Z	cfe93181-67ab-4a3e-9877-de52890cef00	Kinesis Lambda batch result: {"anomaly_count": 0, "invalid_records": 0, "processed_records": 100, "received_records": 100, "window_event_count": 400}
+2026-07-31T02:14:50 REPORT RequestId: cfe93181-67ab-4a3e-9877-de52890cef00	Duration: 183.26 ms	Billed Duration: 184 ms	Memory Size: 256 MB	Max Memory Used: 96 MB
+2026-07-31T02:14:50 START RequestId: 66428db6-f773-4092-bb31-f4ab7271a832 Version: $LATEST
+2026-07-31T02:14:50 [INFO]	2026-07-31T02:14:50.779Z	66428db6-f773-4092-bb31-f4ab7271a832	Speed-layer snapshot persistence: {"bucket": "scp-speed-results-25186396", "bytes_written": 1026, "enabled": true, "etag": "\"7dea44122d0d6d0293a2fa5b954f7a66\"", "key": "speed/latest_snapshot.json", "stored": true}
+2026-07-31T02:14:50 [INFO]	2026-07-31T02:14:50.779Z	66428db6-f773-4092-bb31-f4ab7271a832	Kinesis Lambda batch result: {"anomaly_count": 0, "invalid_records": 0, "processed_records": 100, "received_records": 100, "window_event_count": 500}
+2026-07-31T02:14:50 REPORT RequestId: 66428db6-f773-4092-bb31-f4ab7271a832	Duration: 189.23 ms	Billed Duration: 190 ms	Memory Size: 256 MB	Max Memory Used: 96 MB
+2026-07-31T02:14:50 START RequestId: 661df62e-8ff1-456f-a9b1-331f42ef7c0c Version: $LATEST
+2026-07-31T02:14:50 [INFO]	2026-07-31T02:14:50.983Z	661df62e-8ff1-456f-a9b1-331f42ef7c0c	Speed-layer snapshot persistence: {"bucket": "scp-speed-results-25186396", "bytes_written": 1027, "enabled": true, "etag": "\"5168b3b1b008f73e2e91d483dbc75897\"", "key": "speed/latest_snapshot.json", "stored": true}
+2026-07-31T02:14:50 [INFO]	2026-07-31T02:14:50.984Z	661df62e-8ff1-456f-a9b1-331f42ef7c0c	Kinesis Lambda batch result: {"anomaly_count": 0, "invalid_records": 0, "processed_records": 100, "received_records": 100, "window_event_count": 600}
+2026-07-31T02:14:50 REPORT RequestId: 661df62e-8ff1-456f-a9b1-331f42ef7c0c	Duration: 190.84 ms	Billed Duration: 191 ms	Memory Size: 256 MB	Max Memory Used: 96 MB
+2026-07-31T02:16:01 START RequestId: bb8b2f8b-2c5c-4bf7-a284-5c998f2a26a0 Version: $LATEST
+2026-07-31T02:16:01 [INFO]	2026-07-31T02:16:01.218Z	bb8b2f8b-2c5c-4bf7-a284-5c998f2a26a0	Speed-layer snapshot persistence: {"bucket": "scp-speed-results-25186396", "bytes_written": 1253, "enabled": true, "etag": "\"2dfdda33b1a01097ba0ba8312b33b791\"", "key": "speed/latest_snapshot.json", "stored": true}
+2026-07-31T02:16:01 [INFO]	2026-07-31T02:16:01.218Z	bb8b2f8b-2c5c-4bf7-a284-5c998f2a26a0	Kinesis Lambda batch result: {"anomaly_count": 0, "invalid_records": 0, "processed_records": 100, "received_records": 100, "window_event_count": 700}
+2026-07-31T02:16:01 REPORT RequestId: bb8b2f8b-2c5c-4bf7-a284-5c998f2a26a0	Duration: 212.86 ms	Billed Duration: 213 ms	Memory Size: 256 MB	Max Memory Used: 97 MB
+2026-07-31T02:16:01 START RequestId: cfc17425-667e-4163-ae03-6e7224a544f0 Version: $LATEST
+2026-07-31T02:16:01 INIT_START Runtime Version: python:3.11.mainlinev2.v27	Runtime Version ARN: arn:aws:lambda:us-east-1::runtime:81a2f2bcc7b606f63601c58153453037785e00ca30d21476cee5f82df01b0d71
+2026-07-31T02:16:01 [INFO]	2026-07-31T02:16:01.414Z	cfc17425-667e-4163-ae03-6e7224a544f0	Speed-layer snapshot persistence: {"bucket": "scp-speed-results-25186396", "bytes_written": 1254, "enabled": true, "etag": "\"d6cb0270a4b66780a7383f37dbb788aa\"", "key": "speed/latest_snapshot.json", "stored": true}
+2026-07-31T02:16:01 [INFO]	2026-07-31T02:16:01.414Z	cfc17425-667e-4163-ae03-6e7224a544f0	Kinesis Lambda batch result: {"anomaly_count": 0, "invalid_records": 0, "processed_records": 100, "received_records": 100, "window_event_count": 800}
+2026-07-31T02:16:01 REPORT RequestId: cfc17425-667e-4163-ae03-6e7224a544f0	Duration: 193.91 ms	Billed Duration: 194 ms	Memory Size: 256 MB	Max Memory Used: 97 MB
+2026-07-31T02:16:01 START RequestId: caa563f8-d2d2-4250-a21e-5dc1cfc4f5be Version: $LATEST
+2026-07-31T02:16:03 [INFO]	2026-07-31T02:16:03.199Z	caa563f8-d2d2-4250-a21e-5dc1cfc4f5be	Speed-layer snapshot persistence: {"bucket": "scp-speed-results-25186396", "bytes_written": 802, "enabled": true, "etag": "\"fa103c444c6f0a04ba9a13911de93043\"", "key": "speed/latest_snapshot.json", "stored": true}
+2026-07-31T02:16:03 [INFO]	2026-07-31T02:16:03.199Z	caa563f8-d2d2-4250-a21e-5dc1cfc4f5be	Kinesis Lambda batch result: {"anomaly_count": 0, "invalid_records": 0, "processed_records": 100, "received_records": 100, "window_event_count": 100}
+2026-07-31T02:16:03 REPORT RequestId: caa563f8-d2d2-4250-a21e-5dc1cfc4f5be	Duration: 1520.44 ms	Billed Duration: 1848 ms	Memory Size: 256 MB	Max Memory Used: 96 MB	Init Duration: 326.85 ms
+2026-07-31T02:16:03 START RequestId: 2166e481-96a5-4b64-a2b3-48dbffc25bf4 Version: $LATEST
+2026-07-31T02:16:03 [INFO]	2026-07-31T02:16:03.388Z	2166e481-96a5-4b64-a2b3-48dbffc25bf4	Speed-layer snapshot persistence: {"bucket": "scp-speed-results-25186396", "bytes_written": 805, "enabled": true, "etag": "\"303f949bd4b8c98cf3281a5a95b8fcd3\"", "key": "speed/latest_snapshot.json", "stored": true}
+2026-07-31T02:16:03 [INFO]	2026-07-31T02:16:03.388Z	2166e481-96a5-4b64-a2b3-48dbffc25bf4	Kinesis Lambda batch result: {"anomaly_count": 0, "invalid_records": 0, "processed_records": 100, "received_records": 100, "window_event_count": 200}
+2026-07-31T02:16:03 REPORT RequestId: 2166e481-96a5-4b64-a2b3-48dbffc25bf4	Duration: 175.41 ms	Billed Duration: 176 ms	Memory Size: 256 MB	Max Memory Used: 96 MB
+2026-07-31T02:16:03 START RequestId: d8836e5a-3932-4850-bb8e-5fd9f4a62dbc Version: $LATEST
+2026-07-31T02:16:03 [INFO]	2026-07-31T02:16:03.591Z	d8836e5a-3932-4850-bb8e-5fd9f4a62dbc	Speed-layer snapshot persistence: {"bucket": "scp-speed-results-25186396", "bytes_written": 805, "enabled": true, "etag": "\"41b94bfcb1bf148eb062d2b08894c322\"", "key": "speed/latest_snapshot.json", "stored": true}
+2026-07-31T02:16:03 [INFO]	2026-07-31T02:16:03.591Z	d8836e5a-3932-4850-bb8e-5fd9f4a62dbc	Kinesis Lambda batch result: {"anomaly_count": 0, "invalid_records": 0, "processed_records": 100, "received_records": 100, "window_event_count": 300}
+2026-07-31T02:16:03 START RequestId: d0a79219-caa1-4b77-ac7b-fa135a030024 Version: $LATEST
+2026-07-31T02:16:03 REPORT RequestId: d8836e5a-3932-4850-bb8e-5fd9f4a62dbc	Duration: 183.50 ms	Billed Duration: 184 ms	Memory Size: 256 MB	Max Memory Used: 96 MB
+2026-07-31T02:16:03 [INFO]	2026-07-31T02:16:03.807Z	d0a79219-caa1-4b77-ac7b-fa135a030024	Speed-layer snapshot persistence: {"bucket": "scp-speed-results-25186396", "bytes_written": 1254, "enabled": true, "etag": "\"fdf3d743db8221e17159272772fd6c4d\"", "key": "speed/latest_snapshot.json", "stored": true}
+2026-07-31T02:16:03 [INFO]	2026-07-31T02:16:03.808Z	d0a79219-caa1-4b77-ac7b-fa135a030024	Kinesis Lambda batch result: {"anomaly_count": 0, "invalid_records": 0, "processed_records": 100, "received_records": 100, "window_event_count": 900}
+2026-07-31T02:16:03 REPORT RequestId: d0a79219-caa1-4b77-ac7b-fa135a030024	Duration: 203.80 ms	Billed Duration: 204 ms	Memory Size: 256 MB	Max Memory Used: 97 MB
+2026-07-31T02:16:03 START RequestId: d7ed5fd6-7d21-4bae-a04a-1cf5223c9169 Version: $LATEST
+2026-07-31T02:16:04 [INFO]	2026-07-31T02:16:04.016Z	d7ed5fd6-7d21-4bae-a04a-1cf5223c9169	Speed-layer snapshot persistence: {"bucket": "scp-speed-results-25186396", "bytes_written": 1258, "enabled": true, "etag": "\"cf99737e606686636c77f181b1d82fd4\"", "key": "speed/latest_snapshot.json", "stored": true}
+2026-07-31T02:16:04 [INFO]	2026-07-31T02:16:04.016Z	d7ed5fd6-7d21-4bae-a04a-1cf5223c9169	Kinesis Lambda batch result: {"anomaly_count": 0, "invalid_records": 0, "processed_records": 100, "received_records": 100, "window_event_count": 1000}
+2026-07-31T02:16:04 REPORT RequestId: d7ed5fd6-7d21-4bae-a04a-1cf5223c9169	Duration: 193.64 ms	Billed Duration: 194 ms	Memory Size: 256 MB	Max Memory Used: 97 MB
+2026-07-31T02:16:04 START RequestId: 1607be60-0830-4c99-a5b3-ea786823f2b0 Version: $LATEST
+2026-07-31T02:16:04 [INFO]	2026-07-31T02:16:04.399Z	1607be60-0830-4c99-a5b3-ea786823f2b0	Speed-layer snapshot persistence: {"bucket": "scp-speed-results-25186396", "bytes_written": 1260, "enabled": true, "etag": "\"e6c774909b0eec878c93ded26b96c3a2\"", "key": "speed/latest_snapshot.json", "stored": true}
+2026-07-31T02:16:04 [INFO]	2026-07-31T02:16:04.399Z	1607be60-0830-4c99-a5b3-ea786823f2b0	Kinesis Lambda batch result: {"anomaly_count": 0, "invalid_records": 0, "processed_records": 100, "received_records": 100, "window_event_count": 1100}
+2026-07-31T02:16:04 REPORT RequestId: 1607be60-0830-4c99-a5b3-ea786823f2b0	Duration: 379.41 ms	Billed Duration: 380 ms	Memory Size: 256 MB	Max Memory Used: 97 MB
+2026-07-31T02:16:04 START RequestId: adb9ab54-03e3-419f-862d-219db3b49fff Version: $LATEST
+2026-07-31T02:16:04 [INFO]	2026-07-31T02:16:04.604Z	adb9ab54-03e3-419f-862d-219db3b49fff	Speed-layer snapshot persistence: {"bucket": "scp-speed-results-25186396", "bytes_written": 805, "enabled": true, "etag": "\"02278401834b1394956b3e11e005f5fd\"", "key": "speed/latest_snapshot.json", "stored": true}
+2026-07-31T02:16:04 [INFO]	2026-07-31T02:16:04.604Z	adb9ab54-03e3-419f-862d-219db3b49fff	Kinesis Lambda batch result: {"anomaly_count": 0, "invalid_records": 0, "processed_records": 100, "received_records": 100, "window_event_count": 400}
+2026-07-31T02:16:04 REPORT RequestId: adb9ab54-03e3-419f-862d-219db3b49fff	Duration: 190.81 ms	Billed Duration: 191 ms	Memory Size: 256 MB	Max Memory Used: 96 MB
+2026-07-31T02:16:04 START RequestId: f7e52723-06dd-4b4c-b426-e6518cec568b Version: $LATEST
+2026-07-31T02:16:04 [INFO]	2026-07-31T02:16:04.773Z	f7e52723-06dd-4b4c-b426-e6518cec568b	Speed-layer snapshot persistence: {"bucket": "scp-speed-results-25186396", "bytes_written": 807, "enabled": true, "etag": "\"5fe49e38f4d6a1184273636b82a9865e\"", "key": "speed/latest_snapshot.json", "stored": true}
+2026-07-31T02:16:04 [INFO]	2026-07-31T02:16:04.773Z	f7e52723-06dd-4b4c-b426-e6518cec568b	Kinesis Lambda batch result: {"anomaly_count": 0, "invalid_records": 0, "processed_records": 100, "received_records": 100, "window_event_count": 500}
+2026-07-31T02:16:04 REPORT RequestId: f7e52723-06dd-4b4c-b426-e6518cec568b	Duration: 155.64 ms	Billed Duration: 156 ms	Memory Size: 256 MB	Max Memory Used: 96 MB

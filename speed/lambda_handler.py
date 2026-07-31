@@ -11,7 +11,8 @@ Kinesis record
     -> event validation
     -> sliding-window analytics
     -> anomaly detection
-    -> S3 latest-snapshot persistence
+    -> immutable S3 batch-delta persistence
+    -> local S3 latest-snapshot persistence
     -> partial-batch response
 """
 
@@ -23,9 +24,14 @@ import json
 import logging
 import os
 from typing import Any
+from uuid import uuid4
 
+from speed.batch_delta_store import persist_batch_delta
 from speed.snapshot_store import persist_speed_snapshot
-from speed.stream_consumer import process_kinesis_record
+from speed.stream_consumer import (
+    decode_kinesis_record,
+    process_kinesis_record,
+)
 from speed.window_analytics import SlidingWindowAnalytics
 
 
@@ -352,9 +358,18 @@ def lambda_handler(
     the retry checkpoint when partial-batch reporting is enabled.
     """
 
-    # The Lambda context is currently unnecessary, but it remains in
-    # the function signature because AWS always provides it.
-    del context
+    # AWS supplies a unique request ID for each invocation.
+    #
+    # Unit tests may pass None, so a local identifier is generated as
+    # a fallback.
+    request_id = (
+        getattr(
+            context,
+            "aws_request_id",
+            None,
+        )
+        or f"local-{uuid4().hex}"
+    )
 
     records = event.get(
         "Records",
@@ -368,6 +383,16 @@ def lambda_handler(
 
     processed_records = 0
     invalid_records = 0
+
+    # Valid events from this invocation are retained separately so
+    # they can be stored as one immutable S3 batch delta.
+    processed_events: list[
+        dict[str, Any]
+    ] = []
+
+    processed_identifiers: list[
+        str
+    ] = []
 
     # AWS expects failed Kinesis items in this structure:
     #
@@ -422,11 +447,25 @@ def lambda_handler(
 
             continue
 
-        # process_kinesis_record performs:
-        #
-        # 1. JSON decoding;
-        # 2. shared-event validation;
-        # 3. sliding-window update.
+        # Decode the payload once more so the valid event can also
+        # be included in the immutable invocation delta.
+        decoded_event = decode_kinesis_record(
+            consumer_record
+        )
+
+        if decoded_event is None:
+            invalid_records += 1
+
+            batch_item_failures.append(
+                {
+                    "itemIdentifier": identifier,
+                }
+            )
+
+            continue
+
+        # process_kinesis_record performs shared-event validation and
+        # updates the local sliding-window analytics.
         processed = process_kinesis_record(
             record=consumer_record,
             analytics=_ANALYTICS,
@@ -434,6 +473,24 @@ def lambda_handler(
 
         if processed:
             processed_records += 1
+
+            delta_event = dict(
+                decoded_event
+            )
+
+            # The Kinesis sequence number provides an additional
+            # deterministic identifier for retry deduplication.
+            delta_event[
+                "sequence_number"
+            ] = identifier
+
+            processed_events.append(
+                delta_event
+            )
+
+            processed_identifiers.append(
+                identifier
+            )
         else:
             invalid_records += 1
 
@@ -480,6 +537,95 @@ def lambda_handler(
         "snapshot": snapshot,
     }
 
+    # Store one immutable document containing only the valid
+    # events processed by this Lambda invocation.
+    #
+    # Unlike the cumulative in-memory snapshot, these event deltas
+    # remain correct when AWS uses several Lambda execution
+    # environments.
+    try:
+        delta_persistence = persist_batch_delta(
+            events=processed_events,
+            request_id=request_id,
+        )
+    except Exception as exc:
+        LOGGER.exception(
+            "Speed-layer batch delta persistence failed: %s",
+            exc,
+        )
+
+        delta_persistence = {
+            "enabled": True,
+            "stored": False,
+            "bucket": os.getenv(
+                "SPEED_RESULTS_BUCKET"
+            ),
+            "key": None,
+            "record_count": len(
+                processed_events
+            ),
+            "reason": type(exc).__name__,
+        }
+
+    # Once batch deltas become the durable source for the serving
+    # layer, a failed delta write must cause the corresponding
+    # Kinesis records to be retried.
+    delta_write_failed = (
+        bool(processed_events)
+        and bool(
+            delta_persistence.get(
+                "enabled",
+                True,
+            )
+        )
+        and not bool(
+            delta_persistence.get(
+                "stored"
+            )
+        )
+    )
+
+    if delta_write_failed:
+        existing_failures = {
+            failure["itemIdentifier"]
+            for failure in batch_item_failures
+        }
+
+        for identifier in (
+            processed_identifiers
+        ):
+            if identifier not in (
+                existing_failures
+            ):
+                batch_item_failures.append(
+                    {
+                        "itemIdentifier": (
+                            identifier
+                        ),
+                    }
+                )
+
+    result[
+        "batchItemFailures"
+    ] = batch_item_failures
+
+    result[
+        "delta_persistence"
+    ] = delta_persistence
+
+    LOGGER.info(
+        "Speed-layer batch delta persistence: %s",
+        json.dumps(
+            delta_persistence,
+            sort_keys=True,
+        ),
+    )
+
+    # Keep the latest local snapshot temporarily for backwards
+    # compatibility and diagnostic evidence.
+    #
+    # This snapshot is not a globally shared aggregation when several
+    # Lambda execution environments are active.
     # Store the latest speed-layer view for the serving layer.
     #
     # Persistence is deliberately isolated from Kinesis record
