@@ -1,4 +1,4 @@
-﻿"""Build a combined serving view from batch and speed-layer results.
+"""Build a combined serving view from batch and speed-layer results.
 
 The batch layer represents accurate historical processing.
 
@@ -26,7 +26,7 @@ DEFAULT_SPEED_BUCKET = (
 )
 
 DEFAULT_SPEED_KEY = (
-    "speed/latest_snapshot.json"
+    "speed/global_snapshot.json"
 )
 
 DEFAULT_BATCH_FILE = (
