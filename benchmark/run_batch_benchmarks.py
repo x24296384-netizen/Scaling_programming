@@ -16,8 +16,8 @@ import re
 import subprocess
 import sys
 
-INPUT_PATH = "s3://REPLACE-ME/raw-data/"
-OUTPUT_PATH = "s3://REPLACE-ME/batch-results/"
+INPUT_PATH = "s3://scp-nalini-logs-2026/raw-data/"
+OUTPUT_PATH = "s3://scp-nalini-logs-2026/batch-results/"
 RESULTS_CSV = "benchmark_results.csv"
 
 # fill this in with whatever worker counts we actually test

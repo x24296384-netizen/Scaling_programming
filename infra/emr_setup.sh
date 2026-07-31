@@ -8,10 +8,10 @@ set -e
 # --- config, change these to match our AWS setup ---
 CLUSTER_NAME="scp-batch-layer"
 RELEASE_LABEL="emr-7.1.0"          # check what's actually available in our region
-S3_LOGS_BUCKET="s3://REPLACE-ME/emr-logs/"
-S3_RAW_DATA_BUCKET="s3://REPLACE-ME/raw-data/"   # where the batch job reads from
-KEY_PAIR="REPLACE-ME-keypair"
-SUBNET_ID="REPLACE-ME-subnet"
+S3_LOGS_BUCKET="s3://scp-nalini-logs-2026/emr-logs/"
+S3_RAW_DATA_BUCKET="s3://scp-nalini-logs-2026/raw-data/"   # where the batch job reads from
+KEY_PAIR="scp-batch-key"
+SUBNET_ID="subnet-02ead183ff58da4f2"
 INSTANCE_TYPE="m5.xlarge"
 
 # min/desired/max — good starting point, tune once we see real benchmark numbers
