@@ -1,0 +1,33 @@
+{
+  "benchmark_type": "kinesis_lambda_s3_multi_load",
+  "started_at": "2026-07-31T13:30:53.674810+00:00",
+  "region": "us-east-1",
+  "stream_name": "scp-access-log-stream-25186396",
+  "speed_snapshot": "s3://scp-speed-results-25186396/speed/latest_snapshot.json",
+  "trigger_configuration": {
+    "batch_size": 100,
+    "parallelization_factor": 1
+  },
+  "all_runs_completed": true,
+  "runs": [
+    {
+      "run_id": "20260731T133053-9c4ac31a",
+      "endpoint": "/benchmark/lambda-s3/500/20260731T133053-9c4ac31a",
+      "requested_records": 500,
+      "successful_records": 500,
+      "failed_records": 0,
+      "batches_sent": 1,
+      "producer_seconds": 1.683397,
+      "producer_throughput_records_per_second": 297.018,
+      "snapshot_completed": true,
+      "snapshot_observed_records": 500,
+      "snapshot_maximum_observed_records": 500,
+      "time_to_snapshot_seconds": 4.662578,
+      "complete_runtime_seconds": 6.345986,
+      "end_to_end_throughput_records_per_second": 78.79,
+      "snapshot_generated_at": "2026-07-31T13:30:59.659948+00:00",
+      "lambda_window_event_count": 500,
+      "endpoint_error_rate": 0.05
+    }
+  ]
+}
