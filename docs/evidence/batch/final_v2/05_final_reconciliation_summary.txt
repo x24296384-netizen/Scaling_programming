@@ -1,0 +1,68 @@
+﻿FINAL V2 EMR BATCH RECONCILIATION
+=================================
+
+Execution provenance
+--------------------
+Commit: 120dda8
+EMR cluster: j-2KIK1VQPJT200
+EMR step: s-09947463792EMAWECP0P
+Delivery: final_v2_delivery.zip
+ZIP SHA-256:
+EAE8C84DE4727271AC1EFCE103D3B1E5EA99D83C998E280F32D924A9EBB98474
+
+Data-quality results
+--------------------
+Total raw lines: 10,365,152
+Valid records: 10,365,077
+Invalid records: 75
+Invalid format records: 0
+Invalid timestamp records: 0
+Invalid request records: 75
+Rejection breakdown: invalid_request = 75
+Rejected sample rows: 20
+
+Aggregate reconciliation
+------------------------
+Requests-per-endpoint rows: 893,048
+Requests-per-endpoint total: 10,365,077
+
+Traffic-by-hour rows: 24
+Traffic-by-hour total: 10,365,077
+
+Error-rate rows: 893,048
+Error-rate request total: 10,365,077
+Total error responses: 177,634
+
+Baseline RPM rows: 893,048
+Minimum baseline RPM: 1.0
+Maximum baseline RPM: 79.0
+Empty baseline values: 0
+
+Status-code rows: 15
+Status-code request total: 10,365,077
+
+Response-byte rows: 893,048
+Calculated response bytes: 128,870,996,472
+Batch-summary response bytes: 128,870,996,472
+
+S3 validation
+-------------
+Final S3 CSV object count: 10
+Local total bytes: 1,409,507,365
+Remote total bytes: 1,409,507,365
+Local and remote sizes match: True
+AWS CLI upload exit code: 0
+AWS S3 sync dry-run differences: none
+
+Validation notes
+----------------
+The stored invalid percentage is 0.0 because the value was rounded at the
+precision used by the EMR output. The exact percentage is approximately
+0.0007235784 percent.
+
+The rejected-sample CSV contains escaped quotes, commas and binary-style
+sequences in the raw log lines. It parses correctly when the Spark CSV escape
+character is applied. All 20 sampled records have rejection_reason set to
+invalid_request.
+
+FINAL DELIVERY VALIDATION: PASS

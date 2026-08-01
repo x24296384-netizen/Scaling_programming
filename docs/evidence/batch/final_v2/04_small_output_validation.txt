@@ -1,0 +1,19 @@
+FINAL V2 SMALL-OUTPUT CORRECTION VALIDATION
+======================================================================
+Total raw lines: 10,365,152
+Invalid records: 75
+Exact invalid percentage: 0.0007235784%
+Stored invalid percentage: 0.0
+Expected value at stored precision: 0.0
+
+Rejected breakdown: {'invalid_request': 75}
+Rejected sample fields: ['raw_line', 'rejection_reason']
+Rejected sample rows: 20
+Rejected sample reasons: ['invalid_request']
+Rows with unexpected extra CSV columns: 0
+
+PASS: stored percentage matches its output precision
+PASS: complete rejection breakdown is invalid_request=75
+PASS: rejected sample parses correctly with invalid_request reasons
+
+CORRECTED VALIDATION: PASS
