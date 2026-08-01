@@ -20,6 +20,13 @@ from typing import Any
 
 import boto3
 
+from serving.traffic_spikes import (
+    DEFAULT_MIN_REQUESTS_FOR_TRAFFIC_SPIKE,
+    DEFAULT_TRAFFIC_SPIKE_RATIO,
+    build_endpoint_traffic_view,
+    extract_baseline_rpm,
+)
+
 
 DEFAULT_SPEED_BUCKET = (
     "scp-speed-results-25186396"
@@ -215,6 +222,12 @@ def build_combined_view(
     batch_document: dict[str, Any],
     speed_document: dict[str, Any],
     generated_at: str | None = None,
+    traffic_spike_ratio: float = (
+        DEFAULT_TRAFFIC_SPIKE_RATIO
+    ),
+    minimum_requests_for_traffic_spike: int = (
+        DEFAULT_MIN_REQUESTS_FOR_TRAFFIC_SPIKE
+    ),
 ) -> dict[str, Any]:
     """Create the historical-versus-recent serving document."""
 
@@ -293,14 +306,33 @@ def build_combined_view(
             6,
         )
 
-    baseline_rpm = _optional_float(
-        batch.get(
-            "baseline_rpm",
-            batch_document.get(
-                "baseline_rpm"
-            ),
+    baseline_value = batch.get(
+        "baseline_rpm",
+        batch_document.get(
+            "baseline_rpm"
+        ),
+    )
+
+    baseline_rpm_by_endpoint = (
+        extract_baseline_rpm(
+            baseline_value
         )
     )
+
+    baseline_rpm = _optional_float(
+        baseline_value
+    )
+
+    if (
+        baseline_rpm is None
+        and baseline_rpm_by_endpoint
+    ):
+        baseline_rpm = round(
+            sum(
+                baseline_rpm_by_endpoint.values()
+            ),
+            6,
+        )
 
     traffic_comparison: dict[
         str,
@@ -363,6 +395,41 @@ def build_combined_view(
         | set(recent_errors)
         | set(batch_bytes)
         | set(recent_bytes)
+        | set(baseline_rpm_by_endpoint)
+    )
+
+    if (
+        not baseline_rpm_by_endpoint
+        and baseline_rpm is not None
+        and len(endpoints) == 1
+    ):
+        baseline_rpm_by_endpoint[
+            endpoints[0]
+        ] = baseline_rpm
+
+    endpoint_traffic_view = (
+        build_endpoint_traffic_view(
+            baseline_rpm_by_endpoint=(
+                baseline_rpm_by_endpoint
+            ),
+            recent_requests_by_endpoint=(
+                recent_requests
+            ),
+            window_seconds=window_seconds,
+            endpoint_names=endpoints,
+            traffic_spike_ratio=(
+                traffic_spike_ratio
+            ),
+            minimum_requests=(
+                minimum_requests_for_traffic_spike
+            ),
+        )
+    )
+
+    traffic_comparison.update(
+        endpoint_traffic_view[
+            "summary"
+        ]
     )
 
     endpoint_comparison: dict[
@@ -391,21 +458,11 @@ def build_combined_view(
                 6,
             )
 
-        endpoint_recent_rpm = None
-
-        if (
-            window_seconds is not None
-            and window_seconds > 0
-        ):
-            endpoint_recent_rpm = round(
-                recent_requests.get(
-                    endpoint,
-                    0,
-                )
-                * 60.0
-                / window_seconds,
-                6,
-            )
+        endpoint_traffic = (
+            endpoint_traffic_view[
+                "comparisons"
+            ][endpoint]
+        )
 
         endpoint_comparison[
             endpoint
@@ -422,9 +479,7 @@ def build_combined_view(
                     0,
                 )
             ),
-            "recent_rpm": (
-                endpoint_recent_rpm
-            ),
+            **endpoint_traffic,
             "historical_error_rate": (
                 historical_rate
             ),
@@ -532,7 +587,7 @@ def build_combined_view(
     )
 
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "view_type": (
             "historical_and_recent"
         ),
@@ -549,7 +604,10 @@ def build_combined_view(
             "sliding-window totals cover different "
             "time periods. Counts are displayed side "
             "by side; direct differences use "
-            "normalised rates or shares."
+            "normalised rates or shares. An endpoint "
+            "is a significant traffic increase when its "
+            "recent RPM reaches the configured ratio and "
+            "minimum-request thresholds."
         ),
         "window": {
             "recent_window_seconds": (
@@ -600,6 +658,11 @@ def build_combined_view(
         ),
         "endpoint_comparison": (
             endpoint_comparison
+        ),
+        "traffic_spikes": (
+            endpoint_traffic_view[
+                "spikes"
+            ]
         ),
         "status_code_comparison": (
             status_comparison
@@ -672,6 +735,20 @@ def main() -> None:
     )
 
     parser.add_argument(
+        "--traffic-spike-ratio",
+        type=float,
+        default=DEFAULT_TRAFFIC_SPIKE_RATIO,
+    )
+
+    parser.add_argument(
+        "--minimum-requests-for-traffic-spike",
+        type=int,
+        default=(
+            DEFAULT_MIN_REQUESTS_FOR_TRAFFIC_SPIKE
+        ),
+    )
+
+    parser.add_argument(
         "--output",
         default=DEFAULT_OUTPUT_FILE,
     )
@@ -702,6 +779,12 @@ def main() -> None:
     serving_view = build_combined_view(
         batch_document=batch_document,
         speed_document=speed_document,
+        traffic_spike_ratio=(
+            arguments.traffic_spike_ratio
+        ),
+        minimum_requests_for_traffic_spike=(
+            arguments.minimum_requests_for_traffic_spike
+        ),
     )
 
     output_path = write_combined_view(
@@ -747,6 +830,14 @@ def main() -> None:
         len(
             serving_view[
                 "recent_anomalies"
+            ]
+        ),
+    )
+    print(
+        "Significant traffic increases:",
+        len(
+            serving_view[
+                "traffic_spikes"
             ]
         ),
     )

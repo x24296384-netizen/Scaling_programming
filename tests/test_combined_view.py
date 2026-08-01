@@ -1,4 +1,4 @@
-﻿"""Tests for the combined serving view."""
+"""Tests for the combined serving view."""
 
 from __future__ import annotations
 
@@ -65,7 +65,9 @@ class TestCombinedServingView(
             "batch_metrics": {
                 "total_valid_records": 100,
                 "total_response_bytes": 10000,
-                "baseline_rpm": 20.0,
+                "baseline_rpm": {
+                    "/api/login": 20.0,
+                },
                 "requests_per_endpoint": {
                     "/api/login": 40,
                 },
@@ -192,6 +194,26 @@ class TestCombinedServingView(
                 "error_rate_difference"
             ],
             0.3,
+        )
+
+        self.assertEqual(
+            endpoint[
+                "historical_baseline_rpm"
+            ],
+            20.0,
+        )
+
+        self.assertEqual(
+            endpoint[
+                "recent_to_baseline_ratio"
+            ],
+            0.05,
+        )
+
+        self.assertFalse(
+            endpoint[
+                "significant_increase"
+            ]
         )
 
     def test_missing_baseline_rpm_is_explicit(
