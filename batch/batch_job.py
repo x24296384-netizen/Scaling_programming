@@ -422,10 +422,44 @@ def write_results(results, output_path):
         )
 
 
+def write_data_quality(spark, quality, output_path):
+    """Write the complete data-quality summary as a CSV output."""
+    rows = [(
+        quality["total_raw_lines"],
+        quality["valid_records"],
+        quality["invalid_records"],
+        quality["invalid_format_records"],
+        quality["invalid_timestamp_records"],
+        quality["invalid_request_records"],
+        quality["invalid_percentage"],
+    )]
+
+    dq_df = spark.createDataFrame(
+        rows,
+        [
+            "total_raw_lines",
+            "valid_records",
+            "invalid_records",
+            "invalid_format_records",
+            "invalid_timestamp_records",
+            "invalid_request_records",
+            "invalid_percentage",
+        ],
+    )
+
+    (
+        dq_df.coalesce(1)
+        .write.mode("overwrite")
+        .option("header", "true")
+        .csv(f"{output_path}/data_quality")
+    )
+
+
 def build_rejected_evidence(rejected_df, sample_size=20):
     """Build the rejection breakdown and a bounded inspection sample."""
     if sample_size < 1:
         raise ValueError("sample_size must be at least 1")
+
 
     breakdown = (
         rejected_df.groupBy("rejection_reason")
@@ -514,6 +548,7 @@ def main():
     # Calculate and save the historical batch-layer results.
     results = compute_batch_metrics(df)
     write_results(results, args.output)
+    write_data_quality(spark, quality, args.output)
     write_rejected_evidence(rejected_df, args.output)
 
     elapsed = time.time() - start_time
