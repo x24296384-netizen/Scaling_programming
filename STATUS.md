@@ -1,4 +1,4 @@
-﻿# Project Status
+# Project Status
 
 ## Project
 
@@ -318,30 +318,100 @@ Important commits:
 - `e8bcb14` - Validate batch and streaming analytics parity
 - `67aa834` - Add and validate Kinesis-triggered Lambda processing
 - `9bb4324` - Persist speed-layer snapshots in Amazon S3
+## Day 5 - Global Speed Aggregation and Load Validation
+
+Status: Complete
+
+Completed work:
+
+- Added immutable per-invocation Lambda delta documents under `speed/batches/`.
+- Added `speed/global_aggregator.py`.
+- Rebuilt the complete event-time window across concurrent Lambda environments.
+- Added event deduplication and invalid-document accounting.
+- Wrote the consolidated result to `speed/global_snapshot.json`.
+- Updated the serving layer to use the global snapshot instead of treating one Lambda environment as global state.
+- Added automated tests for global aggregation.
+
+AWS validation results:
+
+| Load | Successful | Failed | Local snapshot | Global endpoint count |
+|---:|---:|---:|---:|---:|
+| 100 | 100 | 0 | 100 | 100 |
+| 500 | 500 | 0 | 500 | 500 |
+| 1,000 | 1,000 | 0 | 600 | 1,000 |
+
+The 1,000-event result demonstrates why the local Lambda snapshot cannot be treated as globally complete. Multiple Lambda execution environments processed the stream, but the immutable deltas allowed the global aggregator to recover all 1,000 events for the benchmark endpoint.
+
+Important commits:
+
+- `33135c8` - Add global speed-layer aggregation
+- `7c8aacf` - Validate global aggregation under Lambda concurrency
+
+## Day 6 - Athena and Endpoint RPM Comparison
+
+Status: Functionality complete; final historical-data validation pending
+
+Completed work:
+
+- Added Athena database, external-table, view, validation and demonstration SQL.
+- Deployed database `scp_web_logs_25186396` in `us-east-1`.
+- Configured the `primary` workgroup result location as `s3://scp-speed-results-25186396/athena-results/`.
+- Created seven external tables and two views.
+- Validated basic Athena query execution.
+- Added endpoint-level historical baseline versus recent RPM comparison.
+- Added configurable traffic-spike ratio and minimum-request thresholds.
+- Added ranked traffic-spike summaries.
+- Validated the comparison with a controlled baseline.
+- Completed a full suite of 61 automated tests.
+
+Important commits:
+
+- `5268911` - Add Athena tables and deployment documentation
+- `75e00da` - Add endpoint RPM baseline comparison
+
+## Batch Evidence Received
+
+Received from the batch-layer owner:
+
+- EMR benchmark documents and report material;
+- execution-time, speedup and efficiency graphs;
+- EMR step and S3 screenshots;
+- auto-scaling policy evidence;
+- final benchmark timings;
+- data-quality totals.
+
+Confirmed batch results:
+
+- Total lines: 10,365,152
+- Valid records: 10,364,866
+- Rejected records: 286
+- 1 worker: 410.4 seconds
+- 2 workers: 380.1 seconds, 1.08× speedup, 54% efficiency
+- 4 workers: 294.1 seconds, 1.40× speedup, 35% efficiency
+
+Still required from the batch-layer owner:
+
+- the actual small `part-*.csv` result files;
+- a conflict-free batch data-quality and rejection-evidence commit based on the latest integration branch;
+- correction of documentation that states all CSV evidence has already been delivered.
+
 ## Current Git Status
 
 Active integration branch:
 
 - `maryhelen-integration`
 
-Latest integration commit:
+Recent completed integration milestones:
 
-- `9bb4324` - Persist speed-layer snapshots in Amazon S3
+- `5268911` - Add Athena tables and deployment documentation
+- `75e00da` - Add endpoint RPM baseline comparison
 
-Pull Request:
+Repository state:
 
-- PR #3
-- Source: `maryhelen-integration`
-- Target: `main`
-- Status: Draft
-- Merge conflicts: none
-- Review requested from Nalini
-- Merge must wait for confirmation of the latest EMR setup, benchmark
-  configuration and AWS evidence.
+- Athena infrastructure and endpoint RPM comparison are committed and synchronised with `origin/maryhelen-integration`.
+- Final batch-data and Athena-result integration remains pending.
+- The older `nalini-batch-layer` branch must not be merged directly. Its later data-quality changes need to be reapplied by the batch-layer owner on top of the current integration branch.
 
-The older `nalini-batch-layer` branch must not be merged directly
-because its work has already been incorporated and reorganised in the
-integration branch.
 ## Local Spark Warnings
 
 Local Spark execution on Windows may show warnings relating to:
@@ -356,32 +426,54 @@ These warnings do not invalidate successful test results when the unittest summa
 
 ## Remaining Technical Tasks
 
-- [ ] Receive Nalini's review of PR #3
-- [ ] Confirm the latest EMR commands and benchmark configuration
-- [ ] Collect remaining EMR, S3 and auto-scaling screenshots
-- [x] Add a Kinesis-triggered AWS Lambda handler
-- [x] Document the Kinesis event-source mapping
-- [x] Persist the latest speed-layer snapshot in Amazon S3
-- [ ] Add the serving-layer comparison between historical baseline and recent traffic
-- [ ] Add or document Athena queries over batch results in Amazon S3
-- [ ] Run benchmarks with multiple controlled traffic volumes
-- [ ] Produce final benchmark graphs
-- [ ] Update the architecture diagram
-- [ ] Update the README with final execution instructions
-- [ ] Prepare the technical report
+- [ ] Receive the real EMR `part-*.csv` outputs
+- [ ] Receive a conflict-free batch data-quality/rejection-evidence commit
+- [ ] Upload the real batch result folders to the project S3 bucket
+- [ ] Execute the four Athena reconciliation checks with real data
+- [ ] Run the final Athena demonstration queries
+- [ ] Generate the real batch serving document
+- [ ] Generate the final combined serving view using real `baseline_rpm`
+- [ ] Capture final Athena and serving-layer evidence
+- [ ] Update the architecture diagram with immutable deltas and global aggregation
+- [ ] Add final evidence files to the organised evidence folders
+- [ ] Update the technical report
 - [ ] Prepare presentation slides and demonstration notes
-- [ ] Run the final automated test suite
-- [ ] Mark PR #3 as ready for review
-- [ ] Merge PR #3 into `main`
+- [ ] Run and save the final automated test suite
+- [ ] Mark the integration pull request ready for review
+- [ ] Merge the integration branch into `main`
 - [ ] Confirm that `main` is clean and deployable
+
+Completed technical tasks:
+
+- [x] Shared schema alignment
+- [x] Reliable Kinesis replay with retries
+- [x] Sliding-window speed analytics
+- [x] Kinesis-triggered Lambda
+- [x] S3 snapshot persistence
+- [x] Immutable Lambda batch deltas
+- [x] Global speed-layer aggregation
+- [x] Controlled 100/500/1,000-event AWS validation
+- [x] Performance graphs
+- [x] Athena database, tables and views
+- [x] Endpoint-level RPM baseline comparison
+- [x] 61-test automated suite
+
 ## Current Priority
 
-Day 4 is complete.
+The remaining critical path is data integration rather than new architecture development:
 
-The next independent technical task is the serving layer:
+```text
+real EMR part CSV files
+        ↓
+project S3 batch prefixes
+        ↓
+Athena reconciliation and demo queries
+        ↓
+real batch serving document
+        ↓
+global speed snapshot + historical baseline
+        ↓
+final combined serving view and evidence
+```
 
-`Amazon S3 batch results + speed/latest_snapshot.json -> combined serving view`
-
-The serving layer should read the recent speed-layer snapshot, load the
-historical batch baseline when available and expose a clear comparison
-between recent and historical traffic.
+While the CSV dependency remains open, independent work can continue on the architecture diagram, evidence organisation, report, presentation and final merge preparation.
