@@ -1,8 +1,8 @@
 python : test_delta_is_written_as_json
 (test_batch_delta_store.TestBatchDeltaStore.test_delta_is_written_as_json) ... ok
-At line:1 char:1
-+ python -m unittest discover `
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+At line:3 char:1
++ python -m unittest discover -s tests -v 2>&1 |
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : NotSpecified: (test_delta_is_w...as_json) ... ok:Str
    ing) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
@@ -15,35 +15,38 @@ test_key_is_unique_and_partitioned
 ... ok
 test_missing_bucket_skips_write
 (test_batch_delta_store.TestBatchDeltaStore.test_missing_bucket_skips_write) ... ok
-26/07/31 04:00:33 WARN Shell: Did not find winutils.exe:
+26/08/01 12:20:15 WARN Shell: Did not find winutils.exe:
 java.io.FileNotFoundException: java.io.FileNotFoundException: HADOOP_HOME and
 hadoop.home.dir are unset. -see https://wiki.apache.org/hadoop/WindowsProblems
 Setting default log level to "WARN".
 To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use
 setLogLevel(newLevel).
-26/07/31 04:00:34 WARN NativeCodeLoader: Unable to load native-hadoop library for
+26/08/01 12:20:15 WARN NativeCodeLoader: Unable to load native-hadoop library for
 your platform... using builtin-java classes where applicable
 test_batch_metrics_are_correct
 (test_batch_job.TestBatchLogParser.test_batch_metrics_are_correct)
 Historical metrics should match the sample log contents. ...
+[Stage 0:>                                                          (0 + 1) / 1]
+
+
 C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777:
-ResourceWarning: unclosed <socket.socket fd=364, family=2, type=1, proto=0,
-laddr=('127.0.0.1', 50683), raddr=('127.0.0.1', 50682)>
+ResourceWarning: unclosed <socket.socket fd=868, family=2, type=1, proto=0,
+laddr=('127.0.0.1', 54185), raddr=('127.0.0.1', 54184)>
   self._sock = None
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777:
-ResourceWarning: unclosed <socket.socket fd=548, family=2, type=1, proto=0,
-laddr=('127.0.0.1', 50685), raddr=('127.0.0.1', 50684)>
+ResourceWarning: unclosed <socket.socket fd=776, family=2, type=1, proto=0,
+laddr=('127.0.0.1', 54187), raddr=('127.0.0.1', 54186)>
   self._sock = None
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777:
-ResourceWarning: unclosed <socket.socket fd=864, family=2, type=1, proto=0,
-laddr=('127.0.0.1', 50687), raddr=('127.0.0.1', 50686)>
+ResourceWarning: unclosed <socket.socket fd=832, family=2, type=1, proto=0,
+laddr=('127.0.0.1', 54189), raddr=('127.0.0.1', 54188)>
   self._sock = None
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777:
-ResourceWarning: unclosed <socket.socket fd=432, family=2, type=1, proto=0,
-laddr=('127.0.0.1', 50689), raddr=('127.0.0.1', 50688)>
+ResourceWarning: unclosed <socket.socket fd=820, family=2, type=1, proto=0,
+laddr=('127.0.0.1', 54191), raddr=('127.0.0.1', 54190)>
   self._sock = None
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 ok
@@ -51,8 +54,8 @@ test_data_quality_counts_valid_and_invalid_records (test_batch_job.TestBatchLogP
 er.test_data_quality_counts_valid_and_invalid_records)
 Data-quality metrics should explain rejected log records. ...
 C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777:
-ResourceWarning: unclosed <socket.socket fd=604, family=2, type=1, proto=0,
-laddr=('127.0.0.1', 50691), raddr=('127.0.0.1', 50690)>
+ResourceWarning: unclosed <socket.socket fd=888, family=2, type=1, proto=0,
+laddr=('127.0.0.1', 54193), raddr=('127.0.0.1', 54192)>
   self._sock = None
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 ok
@@ -60,13 +63,13 @@ test_parser_uses_official_schema_and_utc
 (test_batch_job.TestBatchLogParser.test_parser_uses_official_schema_and_utc)
 Batch parsing should match the producer and normalise time to UTC. ...
 C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777:
-ResourceWarning: unclosed <socket.socket fd=532, family=2, type=1, proto=0,
-laddr=('127.0.0.1', 50693), raddr=('127.0.0.1', 50692)>
+ResourceWarning: unclosed <socket.socket fd=964, family=2, type=1, proto=0,
+laddr=('127.0.0.1', 54195), raddr=('127.0.0.1', 54194)>
   self._sock = None
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777:
-ResourceWarning: unclosed <socket.socket fd=668, family=2, type=1, proto=0,
-laddr=('127.0.0.1', 50695), raddr=('127.0.0.1', 50694)>
+ResourceWarning: unclosed <socket.socket fd=696, family=2, type=1, proto=0,
+laddr=('127.0.0.1', 54197), raddr=('127.0.0.1', 54196)>
   self._sock = None
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 ok
@@ -78,6 +81,19 @@ test_missing_baseline_rpm_is_explicit
 ... ok
 test_s3_json_is_loaded
 (test_combined_view.TestCombinedServingView.test_s3_json_is_loaded) ... ok
+test_deduplicates_retried_events
+(test_global_aggregator.TestGlobalAggregator.test_deduplicates_retried_events) ...
+ok
+test_invalid_documents_and_events_are_counted (test_global_aggregator.TestGlobalAgg
+regator.test_invalid_documents_and_events_are_counted) ... ok
+test_lists_only_json_delta_objects
+(test_global_aggregator.TestGlobalAggregator.test_lists_only_json_delta_objects)
+... ok
+test_rebuilds_event_time_window
+(test_global_aggregator.TestGlobalAggregator.test_rebuilds_event_time_window) ...
+ok
+test_s3_aggregation_writes_global_snapshot (test_global_aggregator.TestGlobalAggreg
+ator.test_s3_aggregation_writes_global_snapshot) ... ok
 test_missing_shard_is_reported
 (test_kinesis_reader.TestKinesisReader.test_missing_shard_is_reported)
 A stream without shards should raise a clear error. ... ok
@@ -169,6 +185,20 @@ Counts, throughput and latency should be calculated correctly. ... ok
 test_fixture_records_reach_sliding_window (test_stream_pipeline.TestLocalStreamPipe
 line.test_fixture_records_reach_sliding_window)
 Real fixture lines should pass through the complete local path. ... ok
+test_builds_ranked_spike_summary
+(test_traffic_spikes.TestTrafficSpikes.test_builds_ranked_spike_summary) ... ok
+test_detects_significant_increase
+(test_traffic_spikes.TestTrafficSpikes.test_detects_significant_increase) ... ok
+test_extracts_mapping_nested_and_row_baselines (test_traffic_spikes.TestTrafficSpik
+es.test_extracts_mapping_nested_and_row_baselines) ... ok
+test_minimum_request_guard_prevents_false_spike (test_traffic_spikes.TestTrafficSpi
+kes.test_minimum_request_guard_prevents_false_spike) ... ok
+test_missing_baseline_is_explicit
+(test_traffic_spikes.TestTrafficSpikes.test_missing_baseline_is_explicit) ... ok
+test_rejects_invalid_thresholds
+(test_traffic_spikes.TestTrafficSpikes.test_rejects_invalid_thresholds) ... ok
+test_zero_baseline_new_traffic_can_be_significant (test_traffic_spikes.TestTrafficS
+pikes.test_zero_baseline_new_traffic_can_be_significant) ... ok
 test_empty_window_snapshot
 (test_window_analytics.TestSlidingWindowAnalytics.test_empty_window_snapshot)
 A new window should contain no events or time boundaries. ... ok
@@ -192,6 +222,71 @@ lytics.test_window_lower_boundary_is_inclusive)
 An event exactly at the cutoff should remain in the window. ... ok
 
 ----------------------------------------------------------------------
-Ran 49 tests in 15.135s
+Ran 61 tests in 14.998s
 
 OK
+26/08/01 12:20:26 ERROR ShutdownHookManager: Exception while deleting Spark temp
+dir: C:\Users\maryh\AppData\Local\Temp\spark-7b11a7ff-98c6-49f9-a785-b58eaf7c548c\p
+yspark-68721a2c-a2b4-47c0-9c15-22dde2bad1f6
+java.nio.file.NoSuchFileException: C:\Users\maryh\AppData\Local\Temp\spark-7b11a7ff
+-98c6-49f9-a785-b58eaf7c548c\pyspark-68721a2c-a2b4-47c0-9c15-22dde2bad1f6
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.j
+ava:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.jav
+a:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.jav
+a:108)
+	at java.base/sun.nio.fs.WindowsFileAttributeViews$Basic.readAttributes(WindowsFile
+AttributeViews.java:53)
+	at java.base/sun.nio.fs.WindowsFileAttributeViews$Basic.readAttributes(WindowsFile
+AttributeViews.java:38)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.readAttributes(WindowsFileSystem
+Provider.java:199)
+	at java.base/java.nio.file.Files.readAttributes(Files.java:1851)
+	at org.apache.spark.network.util.JavaUtils.deleteRecursivelyUsingJavaIO(JavaUtils.
+java:124)
+	at org.apache.spark.network.util.JavaUtils.deleteRecursively(JavaUtils.java:117)
+	at org.apache.spark.network.util.JavaUtils.deleteRecursively(JavaUtils.java:90)
+	at
+org.apache.spark.util.SparkFileUtils.deleteRecursively(SparkFileUtils.scala:121)
+	at
+org.apache.spark.util.SparkFileUtils.deleteRecursively$(SparkFileUtils.scala:120)
+	at org.apache.spark.util.Utils$.deleteRecursively(Utils.scala:1126)
+	at org.apache.spark.util.ShutdownHookManager$.$anonfun$new$4(ShutdownHookManager.s
+cala:65)
+	at org.apache.spark.util.ShutdownHookManager$.$anonfun$new$4$adapted(ShutdownHookM
+anager.scala:62)
+	at scala.collection.IndexedSeqOptimized.foreach(IndexedSeqOptimized.scala:36)
+	at scala.collection.IndexedSeqOptimized.foreach$(IndexedSeqOptimized.scala:33)
+	at scala.collection.mutable.ArrayOps$ofRef.foreach(ArrayOps.scala:198)
+	at org.apache.spark.util.ShutdownHookManager$.$anonfun$new$2(ShutdownHookManager.s
+cala:62)
+	at org.apache.spark.util.SparkShutdownHook.run(ShutdownHookManager.scala:214)
+	at org.apache.spark.util.SparkShutdownHookManager.$anonfun$runAll$2(ShutdownHookMa
+nager.scala:188)
+	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:23)
+	at org.apache.spark.util.Utils$.logUncaughtExceptions(Utils.scala:1928)
+	at org.apache.spark.util.SparkShutdownHookManager.$anonfun$runAll$1(ShutdownHookMa
+nager.scala:188)
+	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:23)
+	at scala.util.Try$.apply(Try.scala:213)
+	at org.apache.spark.util.SparkShutdownHookManager.runAll(ShutdownHookManager.scala
+:188)
+	at org.apache.spark.util.SparkShutdownHookManager$$anon$2.run(ShutdownHookManager.
+scala:178)
+	at
+java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.
+java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor
+.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+ERROR: The process "38216" not found.
+
+----------------------------------------------------------------------
+FINAL RESULT
+Ran 61 tests in 14.998s
+OK
+Process exit code: 0
+Note: subsequent Spark ShutdownHookManager messages concern Windows temporary-directory cleanup.
