@@ -371,29 +371,41 @@ Important commits:
 
 ## Batch Evidence Received
 
-Received from the batch-layer owner:
+Received and validated from the batch-layer owner:
 
 - EMR benchmark documents and report material;
 - execution-time, speedup and efficiency graphs;
-- EMR step and S3 screenshots;
+- EMR step, cluster and S3 evidence;
 - auto-scaling policy evidence;
-- final benchmark timings;
-- data-quality totals.
+- the final single-run delivery containing all ten CSV outputs;
+- complete data-quality and rejected-record evidence.
 
-Confirmed batch results:
+Confirmed final batch results:
 
-- Total lines: 10,365,152
-- Valid records: 10,364,866
-- Rejected records: 286
+- Total raw lines: 10,365,152
+- Valid records: 10,365,077
+- Rejected records: 75
+- Invalid format records: 0
+- Invalid timestamp records: 0
+- Invalid request records: 75
+- Endpoint aggregate rows: 893,048
+- Total error responses: 177,634
+- Total response bytes: 128,870,996,472
 - 1 worker: 410.4 seconds
-- 2 workers: 380.1 seconds, 1.08× speedup, 54% efficiency
-- 4 workers: 294.1 seconds, 1.40× speedup, 35% efficiency
+- 2 workers: 380.1 seconds, 1.08x speedup, 54% efficiency
+- 4 workers: 294.1 seconds, 1.40x speedup, 35% efficiency
 
-Still required from the batch-layer owner:
+Final execution provenance:
 
-- the actual small `part-*.csv` result files;
-- a conflict-free batch data-quality and rejection-evidence commit based on the latest integration branch;
-- correction of documentation that states all CSV evidence has already been delivered.
+- Commit: `120dda8`
+- EMR cluster: `j-2KIK1VQPJT200`
+- EMR step: `s-09947463792EMAWECP0P`
+- Final delivery: `final_v2_delivery.zip`
+- Final CSV outputs: 10
+
+The final delivery was validated locally, uploaded to Amazon S3 and
+reconciled through Amazon Athena. Earlier mixed-run deliveries were marked
+as superseded and were not used in the final analysis.
 
 ## Current Git Status
 
@@ -403,14 +415,22 @@ Active integration branch:
 
 Recent completed integration milestones:
 
-- `5268911` - Add Athena tables and deployment documentation
-- `75e00da` - Add endpoint RPM baseline comparison
+- `8858a64` - Write data-quality summary as a CSV output
+- `c980599` - Add data-quality output test
+- `157cf74` - Add final Athena batch validation evidence
+- `12d9749` - Add final EMR batch delivery evidence
 
 Repository state:
 
-- Athena infrastructure and endpoint RPM comparison are committed and synchronised with `origin/maryhelen-integration`.
-- Final batch-data and Athena-result integration remains pending.
-- The older `nalini-batch-layer` branch must not be merged directly. Its later data-quality changes need to be reapplied by the batch-layer owner on top of the current integration branch.
+- The integration branch is synchronised with `origin/maryhelen-integration`.
+- The full test suite contains 64 tests and completes with `OK` and exit code 0.
+- Final batch-data and Athena-result integration is complete.
+- The final single-run EMR outputs were validated locally, uploaded to
+  Amazon S3, reconciled through Athena and documented with screenshots,
+  manifests and validation summaries.
+- The older `nalini-batch-layer` branch was not merged directly. Required
+  changes were selectively integrated, conflict-resolved and tested on the
+  current integration branch.
 
 ## Local Spark Warnings
 
