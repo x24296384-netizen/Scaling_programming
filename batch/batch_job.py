@@ -170,7 +170,7 @@ def read_raw_data(spark, input_path):
     return _select_valid_records(parsed)
 
 
-def read_raw_data_with_quality(spark, input_path):
+def read_raw_data_with_quality_and_rejected(spark, input_path):
     """
     Return valid records and a summary of rejected log records.
     """
@@ -279,6 +279,16 @@ def read_raw_data_with_quality(spark, input_path):
     parsed.unpersist()
 
     return valid_df, quality, rejected_df
+
+
+def read_raw_data_with_quality(spark, input_path):
+    """Return valid records and quality data using the stable two-value API."""
+    valid_df, quality, rejected_df = read_raw_data_with_quality_and_rejected(
+        spark,
+        input_path,
+    )
+    rejected_df.unpersist()
+    return valid_df, quality
 
 
 def compute_batch_metrics(df):
@@ -412,23 +422,30 @@ def write_results(results, output_path):
         )
 
 
-def write_rejected_evidence(rejected_df, output_path):
-    """
-    Writes (1) a breakdown of rejected lines by precise reason
-    (invalid_format / invalid_timestamp / invalid_request), and (2) a
-    sample of 20 actual rejected raw lines — requested by Mary Helen to
-    compare against the streaming parser's rejection rules.
-    """
+def build_rejected_evidence(rejected_df, sample_size=20):
+    """Build the rejection breakdown and a bounded inspection sample."""
+    if sample_size < 1:
+        raise ValueError("sample_size must be at least 1")
+
     breakdown = (
         rejected_df.groupBy("rejection_reason")
         .agg(F.count("*").alias("count"))
         .orderBy(F.desc("count"))
     )
+    sample = rejected_df.limit(sample_size)
+
+    return breakdown, sample
+
+
+def write_rejected_evidence(rejected_df, output_path):
+    """
+    Write a rejection-reason breakdown and up to 20 rejected raw lines.
+    """
+    breakdown, sample = build_rejected_evidence(rejected_df)
+
     breakdown.coalesce(1).write.mode("overwrite").option("header", "true").csv(
         f"{output_path}/rejected_breakdown"
     )
-
-    sample = rejected_df.limit(20)
     sample.coalesce(1).write.mode("overwrite").option("header", "true").csv(
         f"{output_path}/rejected_sample"
     )
@@ -465,7 +482,7 @@ def main():
     start_time = time.time()
 
     # Read valid records and collect information about rejected lines.
-    df, quality, rejected_df = read_raw_data_with_quality(
+    df, quality, rejected_df = read_raw_data_with_quality_and_rejected(
         spark,
         args.input,
     )
@@ -511,6 +528,7 @@ def main():
 
     # Release the cached DataFrame and stop Spark cleanly.
     df.unpersist()
+    rejected_df.unpersist()
     spark.stop()
 
 
