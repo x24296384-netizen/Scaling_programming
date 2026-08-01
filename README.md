@@ -104,17 +104,42 @@ Run the complete test suite:
 python -m unittest discover -s tests -v
 ```
 
-The latest completed suite contains 61 tests. Local Spark on Windows may print `winutils.exe`, native Hadoop, socket-cleanup or temporary-directory warnings. These warnings do not invalidate a run whose unittest summary ends with `OK`.
+The latest completed suite contains 64 tests and completes with `OK` and exit code `0`. Local Spark on Windows may print `winutils.exe`, native Hadoop, socket-cleanup or temporary-directory warnings. These warnings do not invalidate a run whose unittest summary ends with `OK`.
 
 ## Batch Layer: PySpark on Amazon EMR
 
-The batch layer reads the full Nginx log from Amazon S3 and produces historical aggregates including:
+The batch layer reads the full Nginx log from Amazon S3 and produces ten
+historical and data-quality outputs:
 
 - `requests_per_endpoint/`
 - `traffic_by_hour/`
 - `error_rates/`
 - `baseline_rpm/`
 - `data_quality/`
+- `status_code_distribution/`
+- `response_byte_totals/`
+- `summary/`
+- `rejected_breakdown/`
+- `rejected_sample/`
+
+The final single-run EMR execution used:
+
+- Commit: `120dda8`
+- EMR cluster: `j-2KIK1VQPJT200`
+- EMR step: `s-09947463792EMAWECP0P`
+- Total raw lines: 10,365,152
+- Valid records: 10,365,077
+- Rejected records: 75
+- Invalid format records: 0
+- Invalid timestamp records: 0
+- Invalid request records: 75
+- Endpoint aggregate rows: 893,048
+- Total error responses: 177,634
+- Total response bytes: 128,870,996,472
+
+All ten final CSV outputs came from this same execution. They were reconciled
+locally, uploaded to `s3://scp-speed-results-25186396/batch/` and validated
+through Amazon Athena.
 
 Review the AWS values in `infra/emr_setup.sh`, then launch the EMR cluster:
 
@@ -129,9 +154,9 @@ Upload and submit the Spark job using the paths printed or configured by the inf
 
 | Workers | Execution time | Speedup | Efficiency |
 |---:|---:|---:|---:|
-| 1 | 410.4 s | 1.00× | 100% |
-| 2 | 380.1 s | 1.08× | 54% |
-| 4 | 294.1 s | 1.40× | 35% |
+| 1 | 410.4 s | 1.00x | 100% |
+| 2 | 380.1 s | 1.08x | 54% |
+| 4 | 294.1 s | 1.40x | 35% |
 
 The measured speedup is sub-linear because Spark startup, scheduling, communication and shuffle overheads remain significant for this workload.
 
@@ -178,7 +203,7 @@ AWS validation completed successfully for 100, 500 and 1,000 events. In the 1,00
 The serving layer calculates:
 
 ```text
-recent_rpm = recent_requests × 60 / window_seconds
+recent_rpm = recent_requests x 60 / window_seconds
 ```
 
 For each endpoint it exposes:
@@ -218,15 +243,35 @@ Deployment status in `us-east-1`:
 - External tables: 7
 - Views: 2
 
-The final validation and demo queries require the real EMR `part-*.csv` outputs to be copied into the expected `batch/` prefixes in the project S3 bucket.
+The final real EMR `part-*.csv` outputs are present in the expected S3
+prefixes. Athena validation confirmed:
+
+- 893,048 endpoint rows;
+- 10,365,077 requests across each main aggregate;
+- 128,870,996,472 response bytes reconciled with the batch summary;
+- 177,634 error responses;
+- 15 HTTP status-code categories;
+- no empty baseline endpoints or null RPM values.
+
+Final query screenshots are stored in
+`docs/evidence/athena/screenshots/`.
 
 ## Current Limitations
 
-- AWS Academy Learner Lab sessions can expire and terminate EMR or Cloud9 resources.
-- The EMR auto-scaling policy was configured and evidenced, but a live scale-out was not observed within the available Learner Lab constraints.
-- Final Athena reconciliation and the production combined serving document remain dependent on delivery of the real EMR result CSV files.
-- The global aggregator is currently run as an explicit command; scheduled execution is a possible future improvement.
+- AWS Academy Learner Lab sessions can expire and terminate EMR or Cloud9
+  resources.
+- The EMR auto-scaling policy was configured and evidenced, but a live
+  scale-out was not observed within the available Learner Lab constraints.
+- Under concurrent Lambda invocations, the latest per-invocation snapshot may
+  contain only part of a large benchmark. The global aggregator reconstructs
+  the complete event-time window from persisted batch deltas.
+- The global speed-layer aggregation is currently executed explicitly rather
+  than through a scheduled production workflow.
 
 ## Project Status
 
-See [`STATUS.md`](STATUS.md) for completed milestones, current evidence and remaining delivery tasks.
+The implementation, 64-test validation, final EMR delivery, S3 upload,
+Athena reconciliation and evidence collection are complete.
+
+See [`STATUS.md`](STATUS.md) for detailed milestones, AWS identifiers,
+benchmark results and evidence locations.
