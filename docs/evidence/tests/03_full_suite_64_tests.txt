@@ -1,55 +1,60 @@
+test_write_data_quality_uses_complete_schema_and_path (test_batch_data_quality_output.TestBatchDataQualityOutput.test_write_data_quality_uses_complete_schema_and_path) ... ok
 test_delta_is_written_as_json (test_batch_delta_store.TestBatchDeltaStore.test_delta_is_written_as_json) ... ok
 test_document_contains_batch_events (test_batch_delta_store.TestBatchDeltaStore.test_document_contains_batch_events) ... ok
 test_key_is_unique_and_partitioned (test_batch_delta_store.TestBatchDeltaStore.test_key_is_unique_and_partitioned) ... ok
 test_missing_bucket_skips_write (test_batch_delta_store.TestBatchDeltaStore.test_missing_bucket_skips_write) ... ok
-26/08/01 14:45:18 WARN Shell: Did not find winutils.exe: java.io.FileNotFoundException: java.io.FileNotFoundException: HADOOP_HOME and hadoop.home.dir are unset. -see https://wiki.apache.org/hadoop/WindowsProblems
+26/08/01 18:07:45 WARN Shell: Did not find winutils.exe: java.io.FileNotFoundException: java.io.FileNotFoundException: HADOOP_HOME and hadoop.home.dir are unset. -see https://wiki.apache.org/hadoop/WindowsProblems
 Setting default log level to "WARN".
 To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
-26/08/01 14:45:18 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+26/08/01 18:07:45 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
 test_batch_metrics_are_correct (test_batch_job.TestBatchLogParser.test_batch_metrics_are_correct)
-Historical metrics should match the sample log contents. ... C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=1116, family=2, type=1, proto=0, laddr=('127.0.0.1', 49383), raddr=('127.0.0.1', 49382)>
+Historical metrics should match the sample log contents. ...
+[Stage 0:>                                                          (0 + 1) / 1]
+
+
+C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=480, family=2, type=1, proto=0, laddr=('127.0.0.1', 52879), raddr=('127.0.0.1', 52878)>
   self._sock = None
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
-C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=1176, family=2, type=1, proto=0, laddr=('127.0.0.1', 49385), raddr=('127.0.0.1', 49384)>
+C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=1036, family=2, type=1, proto=0, laddr=('127.0.0.1', 52881), raddr=('127.0.0.1', 52880)>
   self._sock = None
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
-C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=1188, family=2, type=1, proto=0, laddr=('127.0.0.1', 49388), raddr=('127.0.0.1', 49387)>
+C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=1000, family=2, type=1, proto=0, laddr=('127.0.0.1', 52883), raddr=('127.0.0.1', 52882)>
   self._sock = None
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
-C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=1196, family=2, type=1, proto=0, laddr=('127.0.0.1', 49390), raddr=('127.0.0.1', 49389)>
+C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=888, family=2, type=1, proto=0, laddr=('127.0.0.1', 52885), raddr=('127.0.0.1', 52884)>
   self._sock = None
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 ok
 test_data_quality_counts_valid_and_invalid_records (test_batch_job.TestBatchLogParser.test_data_quality_counts_valid_and_invalid_records)
-Data-quality metrics should explain rejected log records. ... C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=1096, family=2, type=1, proto=0, laddr=('127.0.0.1', 49392), raddr=('127.0.0.1', 49391)>
+Data-quality metrics should explain rejected log records. ... C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=988, family=2, type=1, proto=0, laddr=('127.0.0.1', 52887), raddr=('127.0.0.1', 52886)>
   self._sock = None
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 ok
 test_parser_uses_official_schema_and_utc (test_batch_job.TestBatchLogParser.test_parser_uses_official_schema_and_utc)
-Batch parsing should match the producer and normalise time to UTC. ... C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=1104, family=2, type=1, proto=0, laddr=('127.0.0.1', 49394), raddr=('127.0.0.1', 49393)>
+Batch parsing should match the producer and normalise time to UTC. ... C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=1032, family=2, type=1, proto=0, laddr=('127.0.0.1', 52889), raddr=('127.0.0.1', 52888)>
   self._sock = None
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
-C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=1180, family=2, type=1, proto=0, laddr=('127.0.0.1', 49396), raddr=('127.0.0.1', 49395)>
+C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=476, family=2, type=1, proto=0, laddr=('127.0.0.1', 52891), raddr=('127.0.0.1', 52890)>
   self._sock = None
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 ok
-26/08/01 14:45:33 WARN Shell: Did not find winutils.exe: java.io.FileNotFoundException: java.io.FileNotFoundException: HADOOP_HOME and hadoop.home.dir are unset. -see https://wiki.apache.org/hadoop/WindowsProblems
+26/08/01 18:08:02 WARN Shell: Did not find winutils.exe: java.io.FileNotFoundException: java.io.FileNotFoundException: HADOOP_HOME and hadoop.home.dir are unset. -see https://wiki.apache.org/hadoop/WindowsProblems
 Setting default log level to "WARN".
 To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
-26/08/01 14:45:33 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+26/08/01 18:08:02 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
 test_public_quality_reader_preserves_two_value_interface (test_batch_rejection_evidence.TestBatchRejectionEvidence.test_public_quality_reader_preserves_two_value_interface)
-Existing callers must still receive only records and quality. ... C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=1228, family=2, type=1, proto=0, laddr=('127.0.0.1', 64363), raddr=('127.0.0.1', 64362)>
+Existing callers must still receive only records and quality. ... C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=868, family=2, type=1, proto=0, laddr=('127.0.0.1', 52899), raddr=('127.0.0.1', 52898)>
   self._sock = None
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 ok
 test_rejection_breakdown_and_sample_outputs (test_batch_rejection_evidence.TestBatchRejectionEvidence.test_rejection_breakdown_and_sample_outputs)
-Rejected records must have one reason and bounded evidence. ... C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=996, family=2, type=1, proto=0, laddr=('127.0.0.1', 64365), raddr=('127.0.0.1', 64364)>
+Rejected records must have one reason and bounded evidence. ... C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=476, family=2, type=1, proto=0, laddr=('127.0.0.1', 52901), raddr=('127.0.0.1', 52900)>
   self._sock = None
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
-C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=1088, family=2, type=1, proto=0, laddr=('127.0.0.1', 64367), raddr=('127.0.0.1', 64366)>
+C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=868, family=2, type=1, proto=0, laddr=('127.0.0.1', 52903), raddr=('127.0.0.1', 52902)>
   self._sock = None
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
-C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=1216, family=2, type=1, proto=0, laddr=('127.0.0.1', 64369), raddr=('127.0.0.1', 64368)>
+C:\Users\maryh\AppData\Local\Programs\Python\Python311\Lib\socket.py:777: ResourceWarning: unclosed <socket.socket fd=1052, family=2, type=1, proto=0, laddr=('127.0.0.1', 52905), raddr=('127.0.0.1', 52904)>
   self._sock = None
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 ok
@@ -139,8 +144,80 @@ test_window_lower_boundary_is_inclusive (test_window_analytics.TestSlidingWindow
 An event exactly at the cutoff should remain in the window. ... ok
 
 ----------------------------------------------------------------------
-Ran 63 tests in 29.034s
+Ran 64 tests in 31.451s
 
 OK
-ERROR: The process "21128" not found.
-ERROR: The process "10248" not found.
+26/08/01 18:08:13 ERROR ShutdownHookManager: Exception while deleting Spark temp dir: C:\Users\maryh\AppData\Local\Temp\spark-7760fbc5-9e04-403f-9a17-e696e79e31ac\pyspark-01d4eea9-bc95-4058-80cc-65d554e846f1
+java.nio.file.NoSuchFileException: C:\Users\maryh\AppData\Local\Temp\spark-7760fbc5-9e04-403f-9a17-e696e79e31ac\pyspark-01d4eea9-bc95-4058-80cc-65d554e846f1
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileAttributeViews$Basic.readAttributes(WindowsFileAttributeViews.java:53)
+	at java.base/sun.nio.fs.WindowsFileAttributeViews$Basic.readAttributes(WindowsFileAttributeViews.java:38)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.readAttributes(WindowsFileSystemProvider.java:199)
+	at java.base/java.nio.file.Files.readAttributes(Files.java:1851)
+	at org.apache.spark.network.util.JavaUtils.deleteRecursivelyUsingJavaIO(JavaUtils.java:124)
+	at org.apache.spark.network.util.JavaUtils.deleteRecursively(JavaUtils.java:117)
+	at org.apache.spark.network.util.JavaUtils.deleteRecursively(JavaUtils.java:90)
+	at org.apache.spark.util.SparkFileUtils.deleteRecursively(SparkFileUtils.scala:121)
+	at org.apache.spark.util.SparkFileUtils.deleteRecursively$(SparkFileUtils.scala:120)
+	at org.apache.spark.util.Utils$.deleteRecursively(Utils.scala:1126)
+	at org.apache.spark.util.ShutdownHookManager$.$anonfun$new$4(ShutdownHookManager.scala:65)
+	at org.apache.spark.util.ShutdownHookManager$.$anonfun$new$4$adapted(ShutdownHookManager.scala:62)
+	at scala.collection.IndexedSeqOptimized.foreach(IndexedSeqOptimized.scala:36)
+	at scala.collection.IndexedSeqOptimized.foreach$(IndexedSeqOptimized.scala:33)
+	at scala.collection.mutable.ArrayOps$ofRef.foreach(ArrayOps.scala:198)
+	at org.apache.spark.util.ShutdownHookManager$.$anonfun$new$2(ShutdownHookManager.scala:62)
+	at org.apache.spark.util.SparkShutdownHook.run(ShutdownHookManager.scala:214)
+	at org.apache.spark.util.SparkShutdownHookManager.$anonfun$runAll$2(ShutdownHookManager.scala:188)
+	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:23)
+	at org.apache.spark.util.Utils$.logUncaughtExceptions(Utils.scala:1928)
+	at org.apache.spark.util.SparkShutdownHookManager.$anonfun$runAll$1(ShutdownHookManager.scala:188)
+	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:23)
+	at scala.util.Try$.apply(Try.scala:213)
+	at org.apache.spark.util.SparkShutdownHookManager.runAll(ShutdownHookManager.scala:188)
+	at org.apache.spark.util.SparkShutdownHookManager$$anon$2.run(ShutdownHookManager.scala:178)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+26/08/01 18:08:13 ERROR ShutdownHookManager: Exception while deleting Spark temp dir: C:\Users\maryh\AppData\Local\Temp\spark-ef074e15-0d0b-4ec5-8f25-6b6bbe4f19ef\pyspark-30b7cd39-8b33-4357-a895-0ed10d31d9ce
+java.nio.file.NoSuchFileException: C:\Users\maryh\AppData\Local\Temp\spark-ef074e15-0d0b-4ec5-8f25-6b6bbe4f19ef\pyspark-30b7cd39-8b33-4357-a895-0ed10d31d9ce
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileAttributeViews$Basic.readAttributes(WindowsFileAttributeViews.java:53)
+	at java.base/sun.nio.fs.WindowsFileAttributeViews$Basic.readAttributes(WindowsFileAttributeViews.java:38)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.readAttributes(WindowsFileSystemProvider.java:199)
+	at java.base/java.nio.file.Files.readAttributes(Files.java:1851)
+	at org.apache.spark.network.util.JavaUtils.deleteRecursivelyUsingJavaIO(JavaUtils.java:124)
+	at org.apache.spark.network.util.JavaUtils.deleteRecursively(JavaUtils.java:117)
+	at org.apache.spark.network.util.JavaUtils.deleteRecursively(JavaUtils.java:90)
+	at org.apache.spark.util.SparkFileUtils.deleteRecursively(SparkFileUtils.scala:121)
+	at org.apache.spark.util.SparkFileUtils.deleteRecursively$(SparkFileUtils.scala:120)
+	at org.apache.spark.util.Utils$.deleteRecursively(Utils.scala:1126)
+	at org.apache.spark.util.ShutdownHookManager$.$anonfun$new$4(ShutdownHookManager.scala:65)
+	at org.apache.spark.util.ShutdownHookManager$.$anonfun$new$4$adapted(ShutdownHookManager.scala:62)
+	at scala.collection.IndexedSeqOptimized.foreach(IndexedSeqOptimized.scala:36)
+	at scala.collection.IndexedSeqOptimized.foreach$(IndexedSeqOptimized.scala:33)
+	at scala.collection.mutable.ArrayOps$ofRef.foreach(ArrayOps.scala:198)
+	at org.apache.spark.util.ShutdownHookManager$.$anonfun$new$2(ShutdownHookManager.scala:62)
+	at org.apache.spark.util.SparkShutdownHook.run(ShutdownHookManager.scala:214)
+	at org.apache.spark.util.SparkShutdownHookManager.$anonfun$runAll$2(ShutdownHookManager.scala:188)
+	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:23)
+	at org.apache.spark.util.Utils$.logUncaughtExceptions(Utils.scala:1928)
+	at org.apache.spark.util.SparkShutdownHookManager.$anonfun$runAll$1(ShutdownHookManager.scala:188)
+	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:23)
+	at scala.util.Try$.apply(Try.scala:213)
+	at org.apache.spark.util.SparkShutdownHookManager.runAll(ShutdownHookManager.scala:188)
+	at org.apache.spark.util.SparkShutdownHookManager$$anon$2.run(ShutdownHookManager.scala:178)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+ERROR: The process "33988" not found.
+ERROR: The process "34568" not found.
+
+Exit code: 0
