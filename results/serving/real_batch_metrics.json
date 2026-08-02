@@ -1,0 +1,27 @@
+{
+  "batch_metrics": {
+    "baseline_rpm": {
+      "/settings/logo": 52.25575181831676
+    },
+    "error_rates": {
+      "/settings/logo": {
+        "error_count": 971,
+        "error_rate": 0.0027581544509681947,
+        "total_requests": 352047
+      }
+    },
+    "requests_per_endpoint": {
+      "/settings/logo": 352047
+    },
+    "response_byte_totals": {
+      "/settings/logo": 1444977294
+    },
+    "total_response_bytes": 128870996472,
+    "total_valid_records": 10365077
+  },
+  "source": {
+    "database": "scp_web_logs_25186396",
+    "endpoint": "/settings/logo",
+    "type": "final_emr_batch_via_athena"
+  }
+}

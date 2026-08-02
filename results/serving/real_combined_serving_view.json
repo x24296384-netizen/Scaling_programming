@@ -1,0 +1,83 @@
+{
+  "comparison_note": "Historical batch totals and recent sliding-window totals cover different time periods. Counts are displayed side by side; direct differences use normalised rates or shares. An endpoint is a significant traffic increase when its recent RPM reaches the configured ratio and minimum-request thresholds.",
+  "endpoint_comparison": {
+    "/settings/logo": {
+      "comparison_available": true,
+      "error_rate_difference": 0.047242,
+      "historical_baseline_rpm": 52.25575181831676,
+      "historical_error_rate": 0.0027581544509681947,
+      "historical_requests": 352047,
+      "historical_response_bytes": 1444977294,
+      "minimum_requests_met": true,
+      "minimum_requests_threshold": 10,
+      "recent_error_rate": 0.05,
+      "recent_requests": 600,
+      "recent_response_bytes": 134700,
+      "recent_rpm": 120.0,
+      "recent_to_baseline_ratio": 2.296398,
+      "rpm_difference": 67.744248,
+      "significant_increase": true,
+      "spike_ratio_threshold": 2.0,
+      "traffic_status": "significant increase"
+    }
+  },
+  "generated_at": "2026-08-01T23:40:54.802839+00:00",
+  "recent_anomalies": [],
+  "schema_version": 2,
+  "speed_snapshot_generated_at": "2026-08-01T23:40:32.511876+00:00",
+  "status_code_comparison": {
+    "200": {
+      "historical_count": 0,
+      "historical_share": 0.0,
+      "recent_count": 570,
+      "recent_share": 0.95,
+      "share_difference": 0.95
+    },
+    "500": {
+      "historical_count": 0,
+      "historical_share": 0.0,
+      "recent_count": 30,
+      "recent_share": 0.05,
+      "share_difference": 0.05
+    }
+  },
+  "totals": {
+    "historical_response_bytes": 128870996472,
+    "historical_valid_records": 10365077,
+    "recent_response_bytes": 134700,
+    "recent_valid_records": 600
+  },
+  "traffic_comparison": {
+    "baseline_rpm": 52.255752,
+    "comparison_available": true,
+    "endpoint_baselines_available": 1,
+    "endpoints_compared": 1,
+    "minimum_requests_for_traffic_spike": 10,
+    "recent_rpm": 120.0,
+    "recent_to_baseline_ratio": 2.296398,
+    "rpm_difference": 67.744248,
+    "significant_increase_count": 1,
+    "significant_increase_endpoints": [
+      "/settings/logo"
+    ],
+    "traffic_spike_ratio": 2.0,
+    "traffic_status": "above baseline"
+  },
+  "traffic_spikes": [
+    {
+      "endpoint": "/settings/logo",
+      "historical_baseline_rpm": 52.25575181831676,
+      "recent_requests": 600,
+      "recent_rpm": 120.0,
+      "recent_to_baseline_ratio": 2.296398,
+      "rpm_difference": 67.744248,
+      "traffic_status": "significant increase"
+    }
+  ],
+  "view_type": "historical_and_recent",
+  "window": {
+    "recent_window_end": "2026-08-01T23:39:02.161190+00:00",
+    "recent_window_seconds": 300.0,
+    "recent_window_start": "2026-08-01T23:34:02.161190+00:00"
+  }
+}

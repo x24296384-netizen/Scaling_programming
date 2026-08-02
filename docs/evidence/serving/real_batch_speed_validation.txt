@@ -1,0 +1,49 @@
+﻿REAL BATCH-SPEED SERVING VALIDATION
+===================================
+
+Validation endpoint: /settings/logo
+AWS region: us-east-1
+Speed window: 300 seconds
+
+REAL HISTORICAL BATCH INPUT
+---------------------------
+Source: Final EMR results queried through Amazon Athena
+Historical dataset records: 10,365,077
+Historical endpoint requests: 352,047
+Historical baseline RPM: 52.25575181831676
+
+REAL SPEED-LAYER INPUT
+----------------------
+Events requested: 600
+Events successfully sent to Kinesis: 600
+Failed events: 0
+Kinesis producer batches: 2
+S3 delta objects before: 16
+S3 delta objects after: 22
+
+GLOBAL AGGREGATION
+------------------
+Window event count: 600
+Recent endpoint requests: 600
+Recent RPM: 120.0
+Recent error count: 30
+Recent error rate: 0.05
+Duplicate events: 0
+Invalid documents: 0
+Invalid events: 0
+
+COMBINED SERVING RESULT
+-----------------------
+RPM difference: 67.744248
+Recent-to-baseline ratio: 2.296398
+Traffic status: significant increase
+Significant increase: True
+Error-rate anomalies: 0
+
+CONCLUSION
+----------
+The real serving-layer validation successfully combined the historical
+baseline produced by the EMR batch path with the global recent snapshot
+produced by the Kinesis, Lambda and S3 speed path. The recent request rate
+was 2.296398 times the historical baseline and was therefore classified
+as a significant traffic increase.

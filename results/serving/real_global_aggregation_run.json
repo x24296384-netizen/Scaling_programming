@@ -1,0 +1,55 @@
+{
+  "anomalies": [],
+  "persistence": {
+    "bucket": "scp-speed-results-25186396",
+    "bytes_written": 776,
+    "enabled": true,
+    "etag": "\"851c813a3aed0b7928ffb95a868e48b8\"",
+    "key": "speed/global_snapshot.json",
+    "stored": true
+  },
+  "snapshot": {
+    "error_rates": {
+      "/settings/logo": {
+        "error_count": 30,
+        "error_rate": 0.05,
+        "total_requests": 600
+      }
+    },
+    "requests_per_endpoint": {
+      "/settings/logo": 600
+    },
+    "response_byte_totals": {
+      "/settings/logo": 134700
+    },
+    "status_code_distribution": {
+      "200": 570,
+      "500": 30
+    },
+    "total_response_bytes": 134700,
+    "total_valid_records": 600,
+    "traffic_by_hour": {
+      "23": 600
+    },
+    "window_end": "2026-08-01T23:39:02.161190+00:00",
+    "window_event_count": 600,
+    "window_seconds": 300,
+    "window_start": "2026-08-01T23:34:02.161190+00:00"
+  },
+  "source": {
+    "bucket": "scp-speed-results-25186396",
+    "object_count": 22,
+    "prefix": "speed/batches"
+  },
+  "summary": {
+    "anomaly_count": 0,
+    "duplicate_events": 0,
+    "invalid_documents": 0,
+    "invalid_events": 0,
+    "raw_events": 2200,
+    "scanned_objects": 22,
+    "unique_events": 2200,
+    "valid_documents": 22,
+    "window_event_count": 600
+  }
+}
