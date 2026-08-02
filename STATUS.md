@@ -7,7 +7,8 @@
 - **Cloud platform:** Amazon Web Services
 - **Primary region:** `us-east-1`
 - **Deadline:** 4 August 2026 at 5:00 pm
-- **Active integration branch:** `maryhelen-integration`
+- **Final repository branch:** `main`
+- **Merged integration branch:** `maryhelen-integration`
 
 The project analyses a large Nginx access-log dataset through two processing
 paths:
@@ -27,11 +28,15 @@ compare recent endpoint RPM with a historical baseline.
 - **Real Batch-Speed serving validation:** Complete
 - **Architecture diagram:** Complete
 - **Automated tests:** 64 passed
-- **Final documentation and merge:** In progress
+- **Performance analysis:** Complete
+- **Repository review and merge into `main`:** Complete
+- **Technical report:** Final review in progress
+- **Presentation, demonstration and submission:** Pending
 
-No additional architecture development is currently required. The remaining
-work is final documentation, performance analysis, report preparation,
-presentation preparation and integration into `main`.
+No additional architecture or repository integration work is required. The
+remaining work is limited to final report checks, the presentation and
+demonstration, submission, and an optional update if additional EMR
+auto-scaling evidence becomes available before the deadline.
 
 ## Team Responsibilities
 
@@ -56,7 +61,9 @@ presentation preparation and integration into `main`.
 - Batch benchmark documentation
 
 The batch contribution has been received, validated and integrated. No further
-batch-layer dependency remains open.
+batch implementation dependency remains open. One optional evidence
+enhancement remains under review: a final attempt to capture a live EMR
+scale-out event before submission.
 
 ## Shared Event Schema
 
@@ -363,23 +370,23 @@ The suite later grew to 64 tests.
 Controlled comparison evidence:
 
 ```text
-docs/evidence/day4/01_producer_fixture_validation.txt
-docs/evidence/day4/02_batch_fixture_validation.txt
-docs/evidence/day4/03_batch_alignment_confirmation.txt
-docs/evidence/day4/04_batch_metrics_validation.txt
-docs/evidence/day4/05_stream_metrics_validation.txt
-docs/evidence/day4/06_batch_stream_comparison_clean.txt
-docs/evidence/day4/07_full_test_suite.txt
+docs/evidence/integration/01_producer_fixture_validation.txt
+docs/evidence/integration/02_batch_fixture_validation.txt
+docs/evidence/integration/03_batch_alignment_confirmation.txt
+docs/evidence/integration/04_batch_metrics_validation.txt
+docs/evidence/integration/05_stream_metrics_validation.txt
+docs/evidence/integration/06_batch_stream_comparison.txt
 ```
 
-Lambda and AWS evidence:
+Lambda, persistence and test evidence:
 
 ```text
-docs/evidence/day4/08_lambda_handler_tests.txt
-docs/evidence/day4/09_full_suite_with_lambda.txt
-docs/evidence/day4/10_real_kinesis_lambda_e2e.txt
-docs/evidence/day4/11_full_suite_with_s3_persistence.txt
-docs/evidence/day4/12_s3_snapshot_persistence_e2e.txt
+docs/evidence/speed/01_real_kinesis_lambda_e2e.txt
+docs/evidence/speed/02_s3_snapshot_persistence_e2e.txt
+docs/evidence/speed/03_lambda_distributed_state_limitation.txt
+docs/evidence/speed/screenshots/
+docs/evidence/tests/01_lambda_handler_tests.txt
+docs/evidence/tests/02_full_suite_64_tests.txt
 ```
 
 Machine-readable evidence:
@@ -501,7 +508,8 @@ Confirmed final batch results:
 
 Final execution provenance:
 
-- Batch commit: `120dda8`
+- Nalini final-run source commit: `120dda8` on `origin/nalini-batch-layer`
+- Equivalent and extended data-quality functionality is integrated in `main`
 - EMR cluster: `j-2KIK1VQPJT200`
 - EMR step: `s-09947463792EMAWECP0P`
 - Final delivery archive: `final_v2_delivery.zip`
@@ -597,19 +605,21 @@ Important commit:
 
 **Status:** Complete
 
-The final local suite contains:
+The latest verification after the fast-forward merge into `main` produced:
 
 ```text
-Ran 64 tests in 30.343s
+Ran 64 tests in 30.407s
 
 OK
 ```
 
 Exit code: `0`
 
-The final concise evidence ends at the unittest `OK` result. Windows-specific
-Spark shutdown warnings that occurred after the completed suite were excluded
-from the concise evidence copy.
+The committed concise evidence at
+`docs/evidence/tests/02_full_suite_64_tests.txt` records an earlier complete
+passing execution in 30.343 seconds. Both runs completed successfully. The
+Windows-specific Spark shutdown warning occurred after the unittest result and
+did not invalidate the suite.
 
 ## Architecture and Evidence
 
@@ -641,30 +651,27 @@ Important commits:
 - `fad2283` - Add final Lambda architecture diagram
 - `8114df6` - Remove obsolete architecture placeholder
 
-## Current Git Status
+## Final Git Status
 
-Active branch:
+**Status:** Complete
+
+The final technical integration was verified as follows:
+
+- `maryhelen-integration` was committed and pushed through `b0fbf1b`;
+- `main` was updated by fast-forward from `82ddf3c` to `b0fbf1b`;
+- `origin/main` was successfully updated to `b0fbf1b`;
+- the final working tree was clean at the merge verification point;
+- the complete 64-test suite passed from the updated `main` worktree;
+- no oversized staged files were found during the final repository review.
+
+Final technical integration commit:
 
 ```text
-maryhelen-integration
+b0fbf1b - Finalize project evidence, analysis, and repository structure
 ```
 
-Recent completed commits:
-
-- `3157f48` - Validate real batch and speed serving integration
-- `8114df6` - Remove obsolete architecture placeholder
-- `fad2283` - Add final Lambda architecture diagram
-- `d1124d4` - Update README with final validated results
-- `4b2123f` - Update status with final EMR and Athena results
-- `12d9749` - Add final EMR batch delivery evidence
-
-Current local work:
-
-- Real Batch-Speed serving evidence was committed and pushed in `3157f48`.
-- `README.md` has been updated with the real serving validation.
-- This `STATUS.md` is the final consolidated project-status document.
-- The integration branch is synchronised through commit `3157f48`.
-- `main` has not yet been updated from the final integration branch.
+The repository no longer depends on `maryhelen-integration` for submission.
+The submission link should point to the `main` branch.
 
 ## Local Spark Warnings
 
@@ -720,18 +727,21 @@ summary ends with `OK` and the process exit code is `0`.
 - [x] Final architecture diagram
 - [x] Organised serving-layer evidence
 - [x] Final 64-test automated suite
+- [x] Final performance-analysis discussion
+- [x] Technical report updated with validated results
+- [x] Review for accidental and oversized files
+- [x] Merge `maryhelen-integration` into `main`
+- [x] Run the final test suite from updated `main`
+- [x] Confirm that `main` was clean and synchronised
+- [x] Commit and push the final repository structure and evidence
 
 ## Remaining Tasks
 
-- [ ] Commit and push the final README and STATUS updates
-- [ ] Finalise the performance-analysis discussion
-- [ ] Update the technical report with final validated results
-- [ ] Prepare presentation slides and demonstration notes
-- [ ] Review the integration branch for accidental or oversized files
-- [ ] Merge `maryhelen-integration` into `main`
-- [ ] Run the final test suite from the updated `main` branch
-- [ ] Confirm that `main` is clean and synchronised
-- [ ] Submit the report and repository link
+- [ ] Incorporate additional live auto-scaling evidence if Nalini provides it
+- [ ] Insert the final presentation URL and signatures in the report
+- [ ] Export and visually verify the final PDF
+- [ ] Prepare presentation slides, demonstration notes and backup video
+- [ ] Submit the report and `main` repository link
 - [ ] Save the submission receipt
 
 ## Current Priority
@@ -739,13 +749,13 @@ summary ends with `OK` and the process exit code is `0`.
 The remaining critical path is:
 
 ```text
-commit README and STATUS
+review optional auto-scaling evidence
         ->
-final performance analysis and report
+finalise and export report PDF
         ->
-merge integration branch into main
+prepare presentation and demonstration
         ->
-test and verify main
+submit report and main repository link
         ->
-presentation and submission
+save submission receipt
 ```
