@@ -2,75 +2,129 @@
 
 ## Project
 
-Scalable Web Log Analytics
+- **Title:** Scalable Web Log Analytics
+- **Architecture:** Lambda Architecture
+- **Cloud platform:** Amazon Web Services
+- **Primary region:** `us-east-1`
+- **Deadline:** 4 August 2026 at 5:00 pm
+- **Active integration branch:** `maryhelen-integration`
 
-Deadline: 4 August 2026 at 5:00 pm
+The project analyses a large Nginx access-log dataset through two processing
+paths:
 
-The project analyses a large Nginx access-log dataset through two processing paths:
+- PySpark batch processing on Amazon EMR;
+- near-real-time processing using Amazon Kinesis Data Streams and AWS Lambda.
 
-- PySpark batch processing on Amazon EMR
-- Real-time processing using Amazon Kinesis Data Streams
+The batch layer provides complete historical analytics. The speed layer
+provides recent event-time analytics. The serving layer combines both paths to
+compare recent endpoint RPM with a historical baseline.
 
-The two paths form a Lambda Architecture. The batch layer provides accurate historical analytics, while the speed layer provides recent, low-latency analytics.
+## Overall Status
+
+- **Technical implementation:** Complete
+- **Final EMR batch delivery:** Complete
+- **Athena deployment and reconciliation:** Complete
+- **Real Batch-Speed serving validation:** Complete
+- **Architecture diagram:** Complete
+- **Automated tests:** 64 passed
+- **Final documentation and merge:** In progress
+
+No additional architecture development is currently required. The remaining
+work is final documentation, performance analysis, report preparation,
+presentation preparation and integration into `main`.
 
 ## Team Responsibilities
 
-- Maryhelen: Nginx parser, Kinesis replay, speed-layer processing, integration and validation
-- Nalini: PySpark batch processing, Amazon EMR, auto-scaling and batch benchmarking
-- Shared: schema alignment, serving layer, evidence, report and presentation
+### Maryhelen
+
+- Shared schema and repository integration
+- Nginx parser and reliable Kinesis replay
+- Sliding-window speed analytics
+- Kinesis-triggered Lambda processing
+- S3 snapshot and immutable-delta persistence
+- Global speed-layer aggregation
+- Combined serving view and traffic-spike comparison
+- Athena deployment, reconciliation and evidence
+- Final architecture, integration evidence and documentation
+
+### Nalini
+
+- PySpark batch-processing implementation
+- Amazon EMR execution and worker benchmarks
+- EMR auto-scaling configuration and evidence
+- Final batch outputs and data-quality evidence
+- Batch benchmark documentation
+
+The batch contribution has been received, validated and integrated. No further
+batch-layer dependency remains open.
 
 ## Shared Event Schema
 
 The batch and real-time paths use the same base schema:
 
-- client_ip
-- timestamp
-- method
-- endpoint
-- protocol
-- status_code
-- response_bytes
-- referrer
-- user_agent
+```text
+client_ip
+timestamp
+method
+endpoint
+protocol
+status_code
+response_bytes
+referrer
+user_agent
+```
 
-The Kinesis path also adds:
+The Kinesis path additionally includes:
 
-- event_id
-- ingested_at
-- source
+```text
+event_id
+ingested_at
+source
+```
 
 Schema rules:
 
-- `timestamp` uses ISO 8601 and is normalised to UTC.
-- `status_code` is stored as an integer.
-- `response_bytes` is stored as an integer.
-- A response-byte value of `-` is converted to zero.
-- `endpoint` is the official field name.
-- HTTP requests must contain method, endpoint and protocol.
-- `event_id` is generated as a UUID.
-- `ingested_at` is a timezone-aware UTC timestamp.
+- `endpoint` is the official shared request-path field;
+- `client_ip` replaces the earlier batch field `ip`;
+- `response_bytes` replaces the earlier batch field `bytes_sent`;
+- timestamps are normalised to timezone-aware ISO 8601 UTC values;
+- `status_code` and `response_bytes` are integers;
+- a response-byte value of `-` is converted to zero;
+- HTTP requests must contain method, endpoint and protocol;
+- `event_id` is generated as a unique identifier;
 - `source` is set to `nginx_access_log`.
 
 ## Day 1 - Repository and Reliability Foundation
 
-Status: Complete
+**Status:** Complete
 
 Completed work:
 
 - Integrated the initial PySpark batch implementation.
 - Created the `maryhelen-integration` branch.
-- Reorganised the repository into batch, speed, producer, benchmark, serving and infrastructure modules.
+- Reorganised the repository into batch, speed, producer, benchmark, serving
+  and infrastructure modules.
 - Added Kinesis record construction.
-- Used `client_ip` as the partition key.
+- Used `client_ip` as the Kinesis partition key.
 - Added `PutRecords` batching.
 - Added partial-failure handling.
 - Retried only failed Kinesis records.
 - Added data-quality reporting.
 - Added automated tests for parsing, batch processing and replay reliability.
+- Fixed Spark test shutdown behaviour on Windows.
+- Added project status and task documentation.
+
+Important commits:
+
+- `7379d7d` - Reorganise project into Lambda architecture modules
+- `8fd0e10` - Add batch data-quality reporting
+- `2bbbca9` - Fix Spark test shutdown on Windows
+- `367d3ae` - Add Kinesis record batching with retry support
+- `849e0b1` - Add project status and task list
 
 ## Day 2 - Shared Schema and Kinesis Replay
 
-Status: Complete
+**Status:** Complete
 
 Completed work:
 
@@ -95,9 +149,11 @@ Important commits:
 
 ## Day 3 - Speed Layer and Benchmarks
 
-Status: Complete
+**Status:** Complete
 
 ### Implementation
+
+Completed work:
 
 - Added event-time sliding-window analytics.
 - Added incremental event eviction.
@@ -107,6 +163,7 @@ Status: Complete
 - Added traffic by hour.
 - Added error rates per endpoint.
 - Added HTTP status-code distribution.
+- Added response-byte totals.
 - Added a local Kinesis-style consumer.
 - Added invalid JSON handling.
 - Added reusable Kinesis shard discovery and record reading.
@@ -132,7 +189,8 @@ Measured results:
 - Sampled local latency mean: 0.0351 ms
 - Sampled local latency p95: 0.06968 ms
 
-The local latency covers parsing, Kinesis-style JSON creation, consumer decoding and sliding-window analytics. It does not include AWS network latency.
+The local latency covers parsing, Kinesis-style JSON creation, consumer
+decoding and sliding-window analytics. It does not include AWS network latency.
 
 ### Real Amazon Kinesis Smoke Test
 
@@ -155,19 +213,23 @@ Observed result:
 
 This was a controlled functional smoke test, not a maximum-throughput test.
 
-Important commit:
+Important commits:
 
-- `bfcfef2` - Complete Day 3 Kinesis speed layer and benchmarks
+- `72b5800` - Add sliding-window speed-layer analytics
+- `cb267e6` - Add local stream consumer and integration tests
+- `bfcfef2` - Complete Kinesis speed layer and benchmarks
 
 ## Day 4 - Batch and Streaming Integration
 
-Status: Complete
+**Status:** Complete
 
 ### Controlled Input
 
 Both processing paths were validated with:
 
-`tests/fixtures/integration_window.log`
+```text
+tests/fixtures/integration_window.log
+```
 
 Controlled input result:
 
@@ -178,48 +240,52 @@ Controlled input result:
 
 ### Batch and Streaming Alignment
 
-The producer parser rejected a malformed HTTP request, but the initial
-batch parser accepted it because the batch validity rule checked only
-the complete log format and timestamp.
+The producer parser rejected a malformed HTTP request, but the initial batch
+parser accepted it because the batch validity rule checked only the complete
+log format and timestamp.
 
 The batch parser was updated to validate the HTTP request structure.
 
-The two paths now reject the same malformed records and calculate the
-same comparable metrics:
+The two paths now reject the same malformed records and calculate the same
+comparable metrics:
 
-- Total valid records
-- Total response bytes
-- Requests per endpoint
-- Error rates per endpoint
-- Traffic by hour
-- Status-code distribution
-- Response-byte totals per endpoint
+- total valid records;
+- total response bytes;
+- requests per endpoint;
+- error rates per endpoint;
+- traffic by hour;
+- status-code distribution;
+- response-byte totals per endpoint.
 
 ### Automated Comparison
 
-The comparison command is:
+Command:
 
-`python -m serving.compare_controlled_window`
+```powershell
+python -m serving.compare_controlled_window
+```
 
 Final result:
 
-- PASS - total valid records
-- PASS - total response bytes
-- PASS - requests per endpoint
-- PASS - error rates
-- PASS - traffic by hour
-- PASS - status-code distribution
-- PASS - response-byte totals per endpoint
+```text
+PASS - total valid records
+PASS - total response bytes
+PASS - requests per endpoint
+PASS - error rates
+PASS - traffic by hour
+PASS - status-code distribution
+PASS - response-byte totals per endpoint
 
-Final comparison result:
-
-`ALL COMPARABLE METRICS MATCH`
+ALL COMPARABLE METRICS MATCH
+```
 
 ### Kinesis-Triggered AWS Lambda
 
 AWS function:
 
-`scp-speed-processor-25186396`
+```text
+scp-speed-processor-25186396
+```
 
 Implemented and validated:
 
@@ -247,22 +313,24 @@ Controlled AWS result:
 
 ### Speed-Layer Snapshot Persistence
 
-The Lambda now persists its latest analytics view in:
+The Lambda persists its latest local analytics view in:
 
-`s3://scp-speed-results-25186396/speed/latest_snapshot.json`
+```text
+s3://scp-speed-results-25186396/speed/latest_snapshot.json
+```
 
 The stored document contains:
 
-- Schema version
-- Generation timestamp
-- Processing summary
-- Recent anomalies
-- Requests per endpoint
-- Error rates
-- Traffic by hour
-- Status-code distribution
-- Response-byte totals
-- Sliding-window boundaries
+- schema version;
+- generation timestamp;
+- processing summary;
+- recent anomalies;
+- requests per endpoint;
+- error rates;
+- traffic by hour;
+- status-code distribution;
+- response-byte totals;
+- sliding-window boundaries.
 
 Controlled persistence result:
 
@@ -274,62 +342,73 @@ Controlled persistence result:
 - Endpoint error rate: 0.50
 - Anomalies detected: 1
 - S3 persistence result: stored
-- Content type: application/json
+- Content type: `application/json`
 - Server-side encryption: AES256
 
 A temporary S3 failure is logged without incorrectly marking already
 processed Kinesis records as invalid.
 
-### Automated Tests
+### Historical Automated-Test Milestone
+
+At the end of Day 4:
 
 - Total tests: 36
 - Result: all tests passed
 - Execution time: 15.934 seconds
 
-The local Spark warnings appeared before or after the unittest output,
-but the final unittest result was `OK`.
+The suite later grew to 64 tests.
 
 ### Evidence
 
 Controlled comparison evidence:
 
-- `docs/evidence/day4/01_producer_fixture_validation.txt`
-- `docs/evidence/day4/02_batch_fixture_validation.txt`
-- `docs/evidence/day4/03_batch_alignment_confirmation.txt`
-- `docs/evidence/day4/04_batch_metrics_validation.txt`
-- `docs/evidence/day4/05_stream_metrics_validation.txt`
-- `docs/evidence/day4/06_batch_stream_comparison_clean.txt`
-- `docs/evidence/day4/07_full_test_suite.txt`
+```text
+docs/evidence/day4/01_producer_fixture_validation.txt
+docs/evidence/day4/02_batch_fixture_validation.txt
+docs/evidence/day4/03_batch_alignment_confirmation.txt
+docs/evidence/day4/04_batch_metrics_validation.txt
+docs/evidence/day4/05_stream_metrics_validation.txt
+docs/evidence/day4/06_batch_stream_comparison_clean.txt
+docs/evidence/day4/07_full_test_suite.txt
+```
 
 Lambda and AWS evidence:
 
-- `docs/evidence/day4/08_lambda_handler_tests.txt`
-- `docs/evidence/day4/09_full_suite_with_lambda.txt`
-- `docs/evidence/day4/10_real_kinesis_lambda_e2e.txt`
-- `docs/evidence/day4/11_full_suite_with_s3_persistence.txt`
-- `docs/evidence/day4/12_s3_snapshot_persistence_e2e.txt`
+```text
+docs/evidence/day4/08_lambda_handler_tests.txt
+docs/evidence/day4/09_full_suite_with_lambda.txt
+docs/evidence/day4/10_real_kinesis_lambda_e2e.txt
+docs/evidence/day4/11_full_suite_with_s3_persistence.txt
+docs/evidence/day4/12_s3_snapshot_persistence_e2e.txt
+```
 
 Machine-readable evidence:
 
-- `results/integration/batch_stream_comparison.json`
+```text
+results/integration/batch_stream_comparison.json
+```
 
 Important commits:
 
 - `e8bcb14` - Validate batch and streaming analytics parity
 - `67aa834` - Add and validate Kinesis-triggered Lambda processing
 - `9bb4324` - Persist speed-layer snapshots in Amazon S3
+
 ## Day 5 - Global Speed Aggregation and Load Validation
 
-Status: Complete
+**Status:** Complete
 
 Completed work:
 
-- Added immutable per-invocation Lambda delta documents under `speed/batches/`.
+- Added immutable per-invocation Lambda delta documents under
+  `speed/batches/`.
 - Added `speed/global_aggregator.py`.
-- Rebuilt the complete event-time window across concurrent Lambda environments.
+- Rebuilt the complete event-time window across concurrent Lambda
+  environments.
 - Added event deduplication and invalid-document accounting.
 - Wrote the consolidated result to `speed/global_snapshot.json`.
-- Updated the serving layer to use the global snapshot instead of treating one Lambda environment as global state.
+- Updated the serving layer to use the global snapshot instead of treating one
+  Lambda environment as global state.
 - Added automated tests for global aggregation.
 
 AWS validation results:
@@ -340,7 +419,10 @@ AWS validation results:
 | 500 | 500 | 0 | 500 | 500 |
 | 1,000 | 1,000 | 0 | 600 | 1,000 |
 
-The 1,000-event result demonstrates why the local Lambda snapshot cannot be treated as globally complete. Multiple Lambda execution environments processed the stream, but the immutable deltas allowed the global aggregator to recover all 1,000 events for the benchmark endpoint.
+The 1,000-event result demonstrates why the local Lambda snapshot cannot be
+treated as globally complete. Multiple Lambda execution environments processed
+the stream, but the immutable deltas allowed the global aggregator to recover
+all 1,000 events for the benchmark endpoint.
 
 Important commits:
 
@@ -349,27 +431,51 @@ Important commits:
 
 ## Day 6 - Athena and Endpoint RPM Comparison
 
-Status: Functionality complete; final historical-data validation pending
+**Status:** Complete
 
 Completed work:
 
 - Added Athena database, external-table, view, validation and demonstration SQL.
 - Deployed database `scp_web_logs_25186396` in `us-east-1`.
-- Configured the `primary` workgroup result location as `s3://scp-speed-results-25186396/athena-results/`.
+- Configured the `primary` workgroup result location as
+  `s3://scp-speed-results-25186396/athena-results/`.
 - Created seven external tables and two views.
-- Validated basic Athena query execution.
+- Validated Athena queries against the final real EMR outputs.
+- Reconciled the main batch aggregates through Athena.
 - Added endpoint-level historical baseline versus recent RPM comparison.
 - Added configurable traffic-spike ratio and minimum-request thresholds.
 - Added ranked traffic-spike summaries.
 - Validated the comparison with a controlled baseline.
-- Completed a full suite of 61 automated tests.
+- Completed a real Batch-Speed comparison for `/settings/logo`.
+- Completed a full suite of 64 automated tests.
+
+Athena configuration:
+
+- Database: `scp_web_logs_25186396`
+- Workgroup: `primary`
+- Query output: `s3://scp-speed-results-25186396/athena-results/`
+- External tables: 7
+- Views: 2
+
+Athena reconciliation confirmed:
+
+- 893,048 endpoint rows;
+- 10,365,077 requests across each main aggregate;
+- 128,870,996,472 response bytes;
+- 177,634 error responses;
+- 15 HTTP status-code categories;
+- no empty baseline endpoints;
+- no null RPM values.
 
 Important commits:
 
 - `5268911` - Add Athena tables and deployment documentation
 - `75e00da` - Add endpoint RPM baseline comparison
+- `157cf74` - Add final Athena batch validation evidence
 
-## Batch Evidence Received
+## Final Batch Evidence
+
+**Status:** Complete and validated
 
 Received and validated from the batch-layer owner:
 
@@ -391,79 +497,204 @@ Confirmed final batch results:
 - Endpoint aggregate rows: 893,048
 - Total error responses: 177,634
 - Total response bytes: 128,870,996,472
-- 1 worker: 410.4 seconds
-- 2 workers: 380.1 seconds, 1.08x speedup, 54% efficiency
-- 4 workers: 294.1 seconds, 1.40x speedup, 35% efficiency
+- Final CSV outputs: 10
 
 Final execution provenance:
 
-- Commit: `120dda8`
+- Batch commit: `120dda8`
 - EMR cluster: `j-2KIK1VQPJT200`
 - EMR step: `s-09947463792EMAWECP0P`
-- Final delivery: `final_v2_delivery.zip`
-- Final CSV outputs: 10
+- Final delivery archive: `final_v2_delivery.zip`
+- Archive SHA-256:
+  `EAE8C84DE4727271AC1EFCE103D3B1E5EA99D83C998E280F32D924A9EBB98474`
 
-The final delivery was validated locally, uploaded to Amazon S3 and
-reconciled through Amazon Athena. Earlier mixed-run deliveries were marked
-as superseded and were not used in the final analysis.
+Batch benchmark results:
+
+| Workers | Execution time | Speedup | Efficiency |
+|---:|---:|---:|---:|
+| 1 | 410.4 s | 1.00x | 100% |
+| 2 | 380.1 s | 1.08x | 54% |
+| 4 | 294.1 s | 1.40x | 35% |
+
+All ten final CSV outputs came from the same EMR execution. Earlier mixed-run
+deliveries were marked as superseded and were not used in the final analysis.
+
+Important commits:
+
+- `c980599` - Add data-quality output test
+- `12d9749` - Add final EMR batch delivery evidence
+- `4b2123f` - Update status with final EMR and Athena results
+
+## Real Batch-Speed Serving Validation
+
+**Status:** Complete
+
+Validation endpoint:
+
+```text
+/settings/logo
+```
+
+Historical input from the final EMR results through Athena:
+
+- Historical dataset records: 10,365,077
+- Historical endpoint requests: 352,047
+- Historical endpoint errors: 971
+- Historical error rate: 0.0027581544509681947
+- Historical response bytes: 1,444,977,294
+- Historical baseline RPM: 52.25575181831676
+
+Recent speed-layer input:
+
+- Events requested: 600
+- Events successfully sent to Kinesis: 600
+- Failed events: 0
+- Kinesis producer batches: 2
+- S3 delta objects before: 16
+- S3 delta objects after: 22
+
+Global aggregation result:
+
+- Window seconds: 300
+- Window event count: 600
+- Recent endpoint requests: 600
+- Recent RPM: 120.0
+- Recent error count: 30
+- Recent error rate: 0.05
+- Duplicate events: 0
+- Invalid documents: 0
+- Invalid events: 0
+
+Combined serving result:
+
+- RPM difference: 67.744248
+- Recent-to-baseline ratio: 2.296398
+- Traffic status: `significant increase`
+- Significant increase: `true`
+- Error-rate anomalies: 0
+
+The traffic-spike rule was satisfied because the recent rate was more than
+twice the historical baseline and the recent request count exceeded the
+minimum of ten. The separate error-rate anomaly rule was not satisfied because
+the recent error rate of `0.05` was below the configured threshold of `0.50`.
+
+Evidence:
+
+```text
+results/serving/real_batch_metrics.json
+results/serving/real_global_aggregation_run.json
+results/serving/real_global_snapshot.json
+results/serving/real_combined_serving_view.json
+docs/evidence/serving/01_real_batch_speed_validation.txt
+docs/evidence/tests/02_full_suite_64_tests.txt
+```
+
+Important commit:
+
+- `3157f48` - Validate real batch and speed serving integration
+
+## Automated Tests
+
+**Status:** Complete
+
+The final local suite contains:
+
+```text
+Ran 64 tests in 30.343s
+
+OK
+```
+
+Exit code: `0`
+
+The final concise evidence ends at the unittest `OK` result. Windows-specific
+Spark shutdown warnings that occurred after the completed suite were excluded
+from the concise evidence copy.
+
+## Architecture and Evidence
+
+**Status:** Complete
+
+Final architecture files:
+
+```text
+docs/architecture/lambda_architecture_final.drawio
+docs/architecture/lambda_architecture_final.png
+docs/architecture/lambda_architecture_final.svg
+```
+
+The diagram includes:
+
+- Nginx data ingestion;
+- historical S3 storage;
+- EMR and PySpark batch processing;
+- Kinesis and Lambda speed processing;
+- S3 local snapshots and immutable deltas;
+- the separate global window aggregator;
+- the global serving snapshot;
+- the combined serving view;
+- Athena external tables, views and SQL queries;
+- EMR auto-scaling and CloudWatch monitoring.
+
+Important commits:
+
+- `fad2283` - Add final Lambda architecture diagram
+- `8114df6` - Remove obsolete architecture placeholder
 
 ## Current Git Status
 
-Active integration branch:
+Active branch:
 
-- `maryhelen-integration`
+```text
+maryhelen-integration
+```
 
-Recent completed integration milestones:
+Recent completed commits:
 
-- `8858a64` - Write data-quality summary as a CSV output
-- `c980599` - Add data-quality output test
-- `157cf74` - Add final Athena batch validation evidence
+- `3157f48` - Validate real batch and speed serving integration
+- `8114df6` - Remove obsolete architecture placeholder
+- `fad2283` - Add final Lambda architecture diagram
+- `d1124d4` - Update README with final validated results
+- `4b2123f` - Update status with final EMR and Athena results
 - `12d9749` - Add final EMR batch delivery evidence
 
-Repository state:
+Current local work:
 
-- The integration branch is synchronised with `origin/maryhelen-integration`.
-- The full test suite contains 64 tests and completes with `OK` and exit code 0.
-- Final batch-data and Athena-result integration is complete.
-- The final single-run EMR outputs were validated locally, uploaded to
-  Amazon S3, reconciled through Athena and documented with screenshots,
-  manifests and validation summaries.
-- The older `nalini-batch-layer` branch was not merged directly. Required
-  changes were selectively integrated, conflict-resolved and tested on the
-  current integration branch.
+- Real Batch-Speed serving evidence was committed and pushed in `3157f48`.
+- `README.md` has been updated with the real serving validation.
+- This `STATUS.md` is the final consolidated project-status document.
+- The integration branch is synchronised through commit `3157f48`.
+- `main` has not yet been updated from the final integration branch.
 
 ## Local Spark Warnings
 
 Local Spark execution on Windows may show warnings relating to:
 
-- `winutils.exe`
-- `HADOOP_HOME`
-- Native Hadoop libraries
-- Local socket cleanup
-- Spark temporary-directory deletion
+- `winutils.exe`;
+- `HADOOP_HOME`;
+- native Hadoop libraries;
+- local socket cleanup;
+- Spark temporary-directory deletion.
 
-These warnings do not invalidate successful test results when the unittest summary ends with `OK`.
+These warnings do not invalidate a successful test run when the unittest
+summary ends with `OK` and the process exit code is `0`.
 
-## Remaining Technical Tasks
+## Current Limitations
 
-- [ ] Receive the real EMR `part-*.csv` outputs
-- [ ] Receive a conflict-free batch data-quality/rejection-evidence commit
-- [ ] Upload the real batch result folders to the project S3 bucket
-- [ ] Execute the four Athena reconciliation checks with real data
-- [ ] Run the final Athena demonstration queries
-- [ ] Generate the real batch serving document
-- [ ] Generate the final combined serving view using real `baseline_rpm`
-- [ ] Capture final Athena and serving-layer evidence
-- [ ] Update the architecture diagram with immutable deltas and global aggregation
-- [ ] Add final evidence files to the organised evidence folders
-- [ ] Update the technical report
-- [ ] Prepare presentation slides and demonstration notes
-- [ ] Run and save the final automated test suite
-- [ ] Mark the integration pull request ready for review
-- [ ] Merge the integration branch into `main`
-- [ ] Confirm that `main` is clean and deployable
+- AWS Academy Learner Lab sessions can expire and terminate temporary
+  resources.
+- The EMR auto-scaling policy was configured and evidenced, but a live
+  scale-out was not observed within the available Learner Lab session.
+- The most recent local Lambda snapshot is not globally complete under
+  concurrency; the global aggregator is therefore required.
+- Global aggregation currently runs explicitly rather than through a scheduled
+  production workflow.
+- The benchmark dataset and AWS Academy environment do not represent a
+  production service-level agreement.
+- Batch scaling was sub-linear because Spark startup, scheduling,
+  communication and shuffle overheads remained significant.
 
-Completed technical tasks:
+## Completed Technical Tasks
 
 - [x] Shared schema alignment
 - [x] Reliable Kinesis replay with retries
@@ -472,28 +703,49 @@ Completed technical tasks:
 - [x] S3 snapshot persistence
 - [x] Immutable Lambda batch deltas
 - [x] Global speed-layer aggregation
-- [x] Controlled 100/500/1,000-event AWS validation
+- [x] Controlled 100, 500 and 1,000-event AWS validation
 - [x] Performance graphs
-- [x] Athena database, tables and views
+- [x] Final single-run EMR batch delivery
+- [x] Ten final batch CSV outputs
+- [x] Batch data-quality and rejection evidence
+- [x] Upload final batch outputs to the project S3 bucket
+- [x] Athena database, seven tables and two views
+- [x] Athena reconciliation checks with real data
+- [x] Athena demonstration queries and screenshots
 - [x] Endpoint-level RPM baseline comparison
-- [x] 61-test automated suite
+- [x] Real historical batch serving document
+- [x] Real global speed snapshot
+- [x] Final combined serving view
+- [x] Real traffic-spike validation
+- [x] Final architecture diagram
+- [x] Organised serving-layer evidence
+- [x] Final 64-test automated suite
+
+## Remaining Tasks
+
+- [ ] Commit and push the final README and STATUS updates
+- [ ] Finalise the performance-analysis discussion
+- [ ] Update the technical report with final validated results
+- [ ] Prepare presentation slides and demonstration notes
+- [ ] Review the integration branch for accidental or oversized files
+- [ ] Merge `maryhelen-integration` into `main`
+- [ ] Run the final test suite from the updated `main` branch
+- [ ] Confirm that `main` is clean and synchronised
+- [ ] Submit the report and repository link
+- [ ] Save the submission receipt
 
 ## Current Priority
 
-The remaining critical path is data integration rather than new architecture development:
+The remaining critical path is:
 
 ```text
-real EMR part CSV files
-        ↓
-project S3 batch prefixes
-        ↓
-Athena reconciliation and demo queries
-        ↓
-real batch serving document
-        ↓
-global speed snapshot + historical baseline
-        ↓
-final combined serving view and evidence
+commit README and STATUS
+        ->
+final performance analysis and report
+        ->
+merge integration branch into main
+        ->
+test and verify main
+        ->
+presentation and submission
 ```
-
-While the CSV dependency remains open, independent work can continue on the architecture diagram, evidence organisation, report, presentation and final merge preparation.

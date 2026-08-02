@@ -4,6 +4,8 @@ A Lambda Architecture project for scalable analysis of large Nginx access logs u
 
 ## Architecture
 
+![Lambda Architecture for Scalable Nginx Web Log Analytics](docs/architecture/lambda_architecture_final.png)
+
 ```text
 Historical path
 Amazon S3 raw logs
@@ -28,7 +30,7 @@ Global sliding-window aggregator
 Global speed snapshot
 
 Serving path
-Historical baseline RPM + global speed snapshot
+Historical batch metrics + global speed snapshot
         ↓
 Endpoint-level RPM comparison and traffic-spike classification
 ```
@@ -108,8 +110,7 @@ The latest completed suite contains 64 tests and completes with `OK` and exit co
 
 ## Batch Layer: PySpark on Amazon EMR
 
-The batch layer reads the full Nginx log from Amazon S3 and produces ten
-historical and data-quality outputs:
+The batch layer reads the full Nginx log from Amazon S3 and produces ten historical and data-quality outputs:
 
 - `requests_per_endpoint/`
 - `traffic_by_hour/`
@@ -137,9 +138,7 @@ The final single-run EMR execution used:
 - Total error responses: 177,634
 - Total response bytes: 128,870,996,472
 
-All ten final CSV outputs came from this same execution. They were reconciled
-locally, uploaded to `s3://scp-speed-results-25186396/batch/` and validated
-through Amazon Athena.
+All ten final CSV outputs came from this same execution. They were reconciled locally, uploaded to `s3://scp-speed-results-25186396/batch/` and validated through Amazon Athena.
 
 Review the AWS values in `infra/emr_setup.sh`, then launch the EMR cluster:
 
@@ -223,6 +222,48 @@ The default spike rule requires both:
 
 The thresholds are configurable through the serving-layer command-line arguments.
 
+## Real Batch-Speed Serving Validation
+
+A final end-to-end serving validation combined real historical metrics from the EMR batch path with a recent global speed-layer snapshot.
+
+The historical baseline was obtained from the final EMR results through Amazon Athena. A controlled recent workload was then sent through Amazon Kinesis, AWS Lambda and Amazon S3 for the same endpoint.
+
+Validation result for `/settings/logo`:
+
+| Metric | Result |
+|---|---:|
+| Historical dataset records | 10,365,077 |
+| Historical endpoint requests | 352,047 |
+| Historical baseline RPM | 52.255752 |
+| Recent Kinesis events requested | 600 |
+| Successfully sent events | 600 |
+| Failed events | 0 |
+| Global-window events | 600 |
+| Recent RPM | 120.0 |
+| RPM difference | 67.744248 |
+| Recent-to-baseline ratio | 2.296398 |
+| Traffic classification | Significant increase |
+| Recent error count | 30 |
+| Recent error rate | 0.05 |
+| Duplicate events | 0 |
+| Invalid documents | 0 |
+| Invalid events | 0 |
+
+The recent traffic rate was approximately 2.30 times the historical baseline. It therefore passed both configured traffic-spike conditions: a ratio of at least `2.0` and at least `10` recent requests.
+
+This traffic classification is independent from the error-rate anomaly rule. The recent error rate was `0.05`, below the configured anomaly threshold of `0.50`, so the run produced one significant traffic increase and zero error-rate anomalies.
+
+Supporting outputs are stored in:
+
+```text
+results/serving/real_batch_metrics.json
+results/serving/real_global_aggregation_run.json
+results/serving/real_global_snapshot.json
+results/serving/real_combined_serving_view.json
+docs/evidence/serving/01_real_batch_speed_validation.txt
+docs/evidence/tests/02_full_suite_64_tests.txt
+```
+
 ## Amazon Athena
 
 Athena scripts are stored in `athena/` and should be executed in this order:
@@ -243,8 +284,7 @@ Deployment status in `us-east-1`:
 - External tables: 7
 - Views: 2
 
-The final real EMR `part-*.csv` outputs are present in the expected S3
-prefixes. Athena validation confirmed:
+The final real EMR `part-*.csv` outputs are present in the expected S3 prefixes. Athena validation confirmed:
 
 - 893,048 endpoint rows;
 - 10,365,077 requests across each main aggregate;
@@ -253,25 +293,17 @@ prefixes. Athena validation confirmed:
 - 15 HTTP status-code categories;
 - no empty baseline endpoints or null RPM values.
 
-Final query screenshots are stored in
-`docs/evidence/athena/screenshots/`.
+Final query screenshots are stored in `docs/evidence/athena/screenshots/`.
 
 ## Current Limitations
 
-- AWS Academy Learner Lab sessions can expire and terminate EMR or Cloud9
-  resources.
-- The EMR auto-scaling policy was configured and evidenced, but a live
-  scale-out was not observed within the available Learner Lab constraints.
-- Under concurrent Lambda invocations, the latest per-invocation snapshot may
-  contain only part of a large benchmark. The global aggregator reconstructs
-  the complete event-time window from persisted batch deltas.
-- The global speed-layer aggregation is currently executed explicitly rather
-  than through a scheduled production workflow.
+- AWS Academy Learner Lab sessions can expire and terminate EMR or Cloud9 resources.
+- The EMR auto-scaling policy was configured and evidenced, but a live scale-out was not observed within the available Learner Lab constraints.
+- Under concurrent Lambda invocations, the latest per-invocation snapshot may contain only part of a large benchmark. The global aggregator reconstructs the complete event-time window from persisted batch deltas.
+- The global speed-layer aggregation is currently executed explicitly rather than through a scheduled production workflow.
 
 ## Project Status
 
-The implementation, 64-test validation, final EMR delivery, S3 upload,
-Athena reconciliation and evidence collection are complete.
+The implementation, 64-test validation, final EMR delivery, S3 upload, Athena reconciliation, real Batch-Speed serving validation and evidence collection are complete.
 
-See [`STATUS.md`](STATUS.md) for detailed milestones, AWS identifiers,
-benchmark results and evidence locations.
+See [`STATUS.md`](STATUS.md) for detailed milestones, AWS identifiers, benchmark results and evidence locations.

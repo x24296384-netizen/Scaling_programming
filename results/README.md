@@ -1,27 +1,19 @@
-﻿# Generated Results
+# Generated Results
 
-This directory contains machine-generated outputs produced by the
-batch, speed, integration and serving layers.
+This directory contains small machine-generated outputs retained for reproducibility.
 
-## speed/benchmarks
-
-Raw JSON results from local streaming, Kinesis and deployed
-Kinesis-Lambda-S3 benchmarks.
-
-## batch
-
-Final CSV, JSON and data-quality outputs from the PySpark and EMR
-batch layer.
+Large Amazon EMR CSV outputs are not stored in Git because of their size. Their manifests, validation evidence and screenshots are available under `docs/evidence/batch/`.
 
 ## integration
 
-Controlled outputs used to validate schema and metric consistency
-between the batch and speed layers.
+Controlled Batch-Speed comparison used to validate schema and metric consistency.
 
 ## serving
 
-Combined serving-layer outputs generated from the available batch
-and speed results.
+Final outputs combining real historical batch metrics with the recent global speed-layer snapshot.
 
-Report-ready charts, logs and screenshots are stored separately
-under docs/evidence/.
+## speed
+
+Local streaming, Amazon Kinesis, AWS Lambda, S3 and global-aggregation benchmark results.
+
+Report-ready charts, logs and screenshots are stored under `docs/evidence/`.

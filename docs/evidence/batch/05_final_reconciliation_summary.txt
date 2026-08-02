@@ -1,4 +1,4 @@
-﻿FINAL V2 EMR BATCH RECONCILIATION
+FINAL V2 EMR BATCH RECONCILIATION
 =================================
 
 Execution provenance

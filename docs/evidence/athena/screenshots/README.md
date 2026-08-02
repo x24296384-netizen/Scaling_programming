@@ -1,4 +1,4 @@
-﻿# Amazon Athena Screenshot Evidence
+# Amazon Athena Screenshot Evidence
 
 These screenshots document the final Amazon Athena deployment and validation
 of the batch-processing results produced by PySpark on Amazon EMR.

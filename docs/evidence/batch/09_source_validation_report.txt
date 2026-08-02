@@ -1,0 +1,78 @@
+FINAL V2 BATCH DELIVERY VALIDATION
+======================================================================
+Delivery folder: C:\Users\maryh\OneDrive - National College of Ireland\Scalable Cloud Programming\Project_Evidence\Batch\final_v2_delivery_extracted_20260801
+CSV outputs found: 10
+
+OUTPUT FILES
+----------------------------------------------------------------------
+baseline_rpm: part-00000-9730067e-7a6f-45a6-bd06-b12c7c698bc1-c000.csv (351,860,284 bytes)
+data_quality: part-00000-02f85019-a223-43bc-b5d2-8777cd3edc25-c000.csv (170 bytes)
+error_rates: part-00000-4add2652-d5c0-4492-9e7e-b8976cbe840d-c000.csv (355,252,099 bytes)
+rejected_breakdown: part-00000-f905a140-8ade-4ef6-b02e-a02edf67727c-c000.csv (42 bytes)
+rejected_sample: part-00000-ca7b6a2e-833b-453f-a73c-4bb642e6a9cb-c000.csv (69,842 bytes)
+requests_per_endpoint: part-00000-cc4544dd-2242-4e04-9f47-ab947ce65d4f-c000.csv (349,752,473 bytes)
+response_byte_totals: part-00000-6dfc88fc-06c6-49bc-b7c2-1797735443e8-c000.csv (352,571,985 bytes)
+status_code_distribution: part-00000-b3baddd1-f5a6-4a45-b516-f8cf8a2e7511-c000.csv (162 bytes)
+summary: part-00000-7e603183-7807-407a-8598-e8fb99036759-c000.csv (63 bytes)
+traffic_by_hour: part-00000-6a3f429f-c382-428c-b3d3-048943948fa1-c000.csv (245 bytes)
+
+FINAL METRICS
+----------------------------------------------------------------------
+Total raw lines: 10,365,152
+Valid records: 10,365,077
+Invalid records: 75
+Invalid format: 0
+Invalid timestamp: 0
+Invalid request: 75
+Invalid percentage: 0.0
+
+Endpoint rows: 893,048
+Endpoint request total: 10,365,077
+Hourly rows: 24
+Hourly request total: 10,365,077
+Error-rate rows: 893,048
+Error-table request total: 10,365,077
+Total error responses: 177,634
+Baseline rows: 893,048
+Minimum baseline RPM: 1.0
+Maximum baseline RPM: 79.0
+Status-code rows: 15
+Status-code request total: 10,365,077
+Response-byte rows: 893,048
+Calculated response bytes: 128,870,996,472
+Summary response bytes: 128,870,996,472
+Rejection breakdown: {'invalid_request': 75}
+Rejected sample rows: 20
+Rejected sample reasons: ['@\\\\x00@\\\\x11\\\\x7F\\\\xA1\\" 400 166 \\"-\\" \\"-\\" \\"-\\""', '\\\\xC00\\\\xCC\\\\xA9\\\\xCC\\\\xA8\\\\xC0\\\\x13\\\\xC0\\\\x14\\\\x00\\\\x9C\\\\x00\\\\x9D\\\\x00/\\\\x005\\\\x00\\" 400 166 \\"-\\" \\"-\\" \\"-\\""', 'data:[{op:%27isNotNull%27', 'invalid_request']
+
+RECONCILIATION CHECKS
+----------------------------------------------------------------------
+PASS: exactly 10 output CSV files
+PASS: total raw lines = 10,365,152
+PASS: valid records = 10,365,077
+PASS: invalid records = 75
+PASS: valid plus invalid equals total
+PASS: invalid format count = 0
+PASS: invalid timestamp count = 0
+PASS: invalid request count = 75
+PASS: invalid categories reconcile
+FAIL: invalid percentage is correct
+PASS: requests-per-endpoint reconciles
+PASS: traffic-by-hour reconciles
+PASS: error-rate requests reconcile
+PASS: status-code distribution reconciles
+PASS: summary valid count reconciles
+PASS: response bytes reconcile with summary
+PASS: baseline row count matches endpoint row count
+PASS: error-rate row count matches endpoint row count
+PASS: response-byte row count matches endpoint row count
+PASS: no empty baseline values
+PASS: rejection breakdown totals 75
+PASS: only invalid_request appears in breakdown
+PASS: rejected sample contains at most 20 rows
+FAIL: sample reasons are valid
+
+FINAL DELIVERY VALIDATION: FAIL
+Failed checks:
+- invalid percentage is correct
+- sample reasons are valid

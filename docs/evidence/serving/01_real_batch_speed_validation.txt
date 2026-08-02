@@ -1,4 +1,4 @@
-﻿REAL BATCH-SPEED SERVING VALIDATION
+REAL BATCH-SPEED SERVING VALIDATION
 ===================================
 
 Validation endpoint: /settings/logo

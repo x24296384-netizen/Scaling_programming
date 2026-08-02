@@ -1,4 +1,4 @@
-﻿# Project Evidence
+# Project Evidence
 
 The evidence is organised by technical purpose rather than by
 development day.

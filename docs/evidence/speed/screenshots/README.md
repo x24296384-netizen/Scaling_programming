@@ -1,4 +1,4 @@
-﻿# AWS Speed-Layer Screenshot Evidence
+# AWS Speed-Layer Screenshot Evidence
 
 ## 01_kinesis_stream_active.png
 Shows the Kinesis data stream in Active state, using provisioned capacity with one shard.

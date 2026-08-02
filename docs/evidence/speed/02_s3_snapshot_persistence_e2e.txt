@@ -1,4 +1,4 @@
-﻿=== S3 OBJECT METADATA ===
+=== S3 OBJECT METADATA ===
 {
     "AcceptRanges": "bytes",
     "LastModified": "2026-07-30T21:18:54+00:00",

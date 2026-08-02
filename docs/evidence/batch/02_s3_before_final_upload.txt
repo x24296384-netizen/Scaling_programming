@@ -1,4 +1,4 @@
-﻿2026-08-01 15:53:50  351860021 batch/baseline_rpm/baseline_rpm.csv
+2026-08-01 15:53:50  351860021 batch/baseline_rpm/baseline_rpm.csv
 2026-08-01 15:55:47         66 batch/data_quality/data_quality.csv
 2026-08-01 15:54:47  355251837 batch/error_rates/error_rates.csv
 2026-08-01 15:55:48  349752241 batch/requests_per_endpoint/requests_per_endpoint.csv
