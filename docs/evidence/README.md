@@ -1,41 +1,62 @@
 # Project Evidence
 
-The evidence is organised by technical purpose rather than by
-development day.
+The evidence is organised by technical purpose rather than by development day.
+Each folder contains screenshots, terminal outputs or report-ready artefacts
+supporting the implementation and evaluation described in the project report.
 
-## aws
+## Evidence structure
 
-Evidence from the deployed Kinesis, Lambda and Amazon S3 speed layer.
+### [Athena](athena/screenshots/)
 
-## batch
+Screenshots showing the Athena database, external tables, views, validation
+queries and serving-layer analysis over the batch and speed results.
 
-EMR batch-layer evidence, output paths, worker benchmarks and
-screenshots received from the batch-layer owner.
+### [Batch](batch/)
 
-## charts
+Evidence from the PySpark batch layer executed on Amazon EMR, including:
 
-Performance charts generated from the AWS speed-layer and EMR
+- cluster and step execution;
+- worker-count benchmarks;
+- data-quality results;
+- Amazon S3 output folders;
+- auto-scaling configuration and workload-pressure evaluation;
+- sanitised post-test instance inventory.
+
+See the [batch evidence index](batch/README.md) for the complete file list and
+interpretation.
+
+### [Charts](charts/)
+
+Performance charts generated from the recorded EMR, Kinesis and AWS Lambda
 benchmark results.
 
-## integration
+### [Integration](integration/)
 
-Shared-schema validation and controlled comparison between the batch
-and speed layers.
+Evidence of shared-schema validation and controlled comparison between the
+batch and speed layers.
 
-## serving
+### [Serving](serving/)
 
-Evidence from the combined serving-layer prototype.
+Evidence from the combined serving layer, including historical baseline,
+recent request rate, error-rate comparison and traffic-spike classification.
 
-## tests
+### [Speed](speed/)
 
-Targeted tests and the latest complete automated test-suite result.
+Evidence from the deployed Kinesis, AWS Lambda and Amazon S3 speed layer,
+including end-to-end ingestion, snapshot generation and global aggregation.
 
-## archive
+### [Tests](tests/)
 
-Superseded development evidence retained for traceability.
+Targeted component tests and complete automated test-suite results.
 
 ## Machine-generated results
 
-Raw JSON, CSV and benchmark outputs remain under results/. This keeps
-the source data separate from report-ready evidence and allows the
-charts to be reproduced.
+Raw JSON, CSV and benchmark outputs are stored under
+[`results/`](../../results/). Keeping these outputs separate from screenshots
+allows the calculations and performance charts to be inspected and reproduced.
+
+## Public evidence
+
+Public screenshots and infrastructure inventories have been sanitised to remove
+account-specific network and instance identifiers. The measured results and
+technical interpretation have been preserved.
