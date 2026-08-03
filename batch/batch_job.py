@@ -1,20 +1,13 @@
-"""
-Batch layer for the Lambda Architecture (Scalable Cloud Programming CA).
+"""PySpark batch layer for historical Nginx access-log analytics.
 
-Dataset confirmed: Kaggle "Web Server Access Logs" (eliasdabbas). This is a
-RAW nginx-style access log, not a clean CSV — each line looks like:
+The job parses raw Nginx combined-log records using the shared project
+schema, validates malformed input, calculates historical aggregates and
+writes analytical and data-quality outputs to Amazon S3.
 
-  192.168.1.10 - - [30/Jul/2025:15:57:19 +0000] "GET /index.html HTTP/1.1" 200 1024 "http://example.com/start" "Mozilla/5.0..."
-
-That's why Mary Helen built a log parser for the producer side. This batch
-job parses the same raw format with a regex (standard nginx "combined" log
-format) so both sides agree on field names. IMPORTANT: once you've looked at
-her actual parser in producer/, double check the field names/regex below
-match hers exactly — the serving layer needs both sides speaking the same
-schema.
-
-Run on EMR with:
-  spark-submit --deploy-mode cluster batch/batch_job.py --input s3://.../raw-data/ --output s3://.../batch-results/
+Example:
+    spark-submit batch/batch_job.py \
+        --input s3://<bucket>/raw-data/ \
+        --output s3://<bucket>/batch-results/
 """
 
 import argparse

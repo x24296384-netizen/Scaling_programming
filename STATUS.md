@@ -35,8 +35,7 @@ compare recent endpoint RPM with a historical baseline.
 
 No additional architecture or repository integration work is required. The
 remaining work is limited to final report checks, the presentation and
-demonstration, submission, and an optional update if additional EMR
-auto-scaling evidence becomes available before the deadline.
+demonstration, submission and preservation of the submission receipt.
 
 ## Team Responsibilities
 
@@ -61,9 +60,8 @@ auto-scaling evidence becomes available before the deadline.
 - Batch benchmark documentation
 
 The batch contribution has been received, validated and integrated. No further
-batch implementation dependency remains open. One optional evidence
-enhancement remains under review: a final attempt to capture a live EMR
-scale-out event before submission.
+batch implementation or evidence dependency remains open. The final EMR
+auto-scaling trigger attempt has been completed and documented.
 
 ## Shared Event Schema
 
@@ -608,7 +606,7 @@ Important commit:
 The latest verification after the fast-forward merge into `main` produced:
 
 ```text
-Ran 64 tests in 30.407s
+Ran 64 tests in 24.606s
 
 OK
 ```
@@ -690,8 +688,10 @@ summary ends with `OK` and the process exit code is `0`.
 
 - AWS Academy Learner Lab sessions can expire and terminate temporary
   resources.
-- The EMR auto-scaling policy was configured and evidenced, but a live
-  scale-out was not observed within the available Learner Lab session.
+- The EMR auto-scaling policy was verified under four concurrent Steps. The
+  workload produced 28 pending containers, but the complete post-test instance
+  inventory contained only two core instances and one master instance; no
+  verified scale-out occurred.
 - The most recent local Lambda snapshot is not globally complete under
   concurrency; the global aggregator is therefore required.
 - Global aggregation currently runs explicitly rather than through a scheduled
@@ -734,28 +734,23 @@ summary ends with `OK` and the process exit code is `0`.
 - [x] Run the final test suite from updated `main`
 - [x] Confirm that `main` was clean and synchronised
 - [x] Commit and push the final repository structure and evidence
+- [x] Integrate the final concurrent EMR auto-scaling trigger evidence
 
 ## Remaining Tasks
 
-- [ ] Incorporate additional live auto-scaling evidence if Nalini provides it
 - [ ] Insert the final presentation URL and signatures in the report
 - [ ] Export and visually verify the final PDF
 - [ ] Prepare presentation slides, demonstration notes and backup video
 - [ ] Submit the report and `main` repository link
 - [ ] Save the submission receipt
 
-## Current Priority
+### Final EMR auto-scaling attempt
 
-The remaining critical path is:
-
-```text
-review optional auto-scaling evidence
-        ->
-finalise and export report PDF
-        ->
-prepare presentation and demonstration
-        ->
-submit report and main repository link
-        ->
-save submission receipt
-```
+- Step Concurrency Level was confirmed as 4.
+- Four EMR Steps started concurrently at approximately 21:14 UTC.
+- The monitoring dashboard recorded 28 pending containers.
+- The complete unfiltered post-test instance inventory listed two core
+  instances and one master instance.
+- No additional core instance was present.
+- No verified scale-out event occurred.
+- Evidence is stored in `docs/evidence/batch/12_*` through `16_*`.

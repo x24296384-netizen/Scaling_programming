@@ -1,6 +1,6 @@
 #!/bin/bash
 # EMR cluster setup for the batch layer (Scalable Cloud Programming CA)
-# This doesn't depend on which dataset we end up using — same cluster, same
+# This doesn't depend on which dataset we end up using - same cluster, same
 # scaling policy either way. Fill in the bucket/subnet/key values before running.
 
 set -e
@@ -8,13 +8,13 @@ set -e
 # --- config, change these to match our AWS setup ---
 CLUSTER_NAME="scp-batch-layer"
 RELEASE_LABEL="emr-7.1.0"          # check what's actually available in our region
-S3_LOGS_BUCKET="s3://scp-nalini-logs-2026/emr-logs/"
-S3_RAW_DATA_BUCKET="s3://scp-nalini-logs-2026/raw-data/"   # where the batch job reads from
-KEY_PAIR="scp-batch-key"
-SUBNET_ID="subnet-02ead183ff58da4f2"
+S3_LOGS_BUCKET="s3://<logs-bucket>/emr-logs/"
+S3_RAW_DATA_BUCKET="s3://<data-bucket>/raw-data/"   # where the batch job reads from
+KEY_PAIR="<ec2-key-pair>"
+SUBNET_ID="<subnet-id>"
 INSTANCE_TYPE="m5.xlarge"
 
-# min/desired/max — good starting point, tune once we see real benchmark numbers
+# min/desired/max - good starting point, tune once we see real benchmark numbers
 MIN_CAPACITY=1
 DESIRED_CAPACITY=2
 MAX_CAPACITY=5
@@ -101,6 +101,6 @@ echo "Cluster launching, ID: $CLUSTER_ID"
 echo "Track status with:"
 echo "  aws emr describe-cluster --cluster-id $CLUSTER_ID"
 echo ""
-echo "For the report/demo video, screenshot the auto-scaling policy in the console"
-echo "and later screenshot a scale-out event actually happening under load —"
-echo "that's the 'evidence scaling occurred' the marking scheme asks for."
+echo "Capture the scaling-policy configuration, concurrent workload,"
+echo "CloudWatch metrics and complete post-test instance inventory."
+echo "Report the observed result accurately, including when no verified scale-out occurs."

@@ -1,155 +1,112 @@
 # Scalable Web Log Analytics
 
-A Lambda Architecture project for scalable analysis of large Nginx access logs using Amazon EMR, PySpark, Amazon Kinesis Data Streams, AWS Lambda, Amazon S3 and Amazon Athena.
+A Lambda Architecture project for scalable historical and near-real-time analysis of large Nginx access logs using Python, PySpark, Amazon EMR, Amazon Kinesis Data Streams, AWS Lambda, Amazon S3 and Amazon Athena.
+
+The system combines a complete historical batch path with a recent event-time speed path. A serving layer then compares recent endpoint traffic with a historical requests-per-minute baseline and classifies significant traffic increases.
+
+## Project Status
+
+The technical implementation is complete on the `main` branch.
+
+| Area | Status |
+|---|---|
+| Shared event schema | Complete |
+| PySpark batch layer | Complete |
+| Amazon EMR execution and benchmarks | Complete |
+| Kinesis and Lambda speed layer | Complete |
+| Global speed aggregation | Complete |
+| Athena tables, views and reconciliation | Complete |
+| Batch-speed serving validation | Complete |
+| Automated tests | 64 passed |
+| Architecture and evidence | Complete |
+
+Detailed milestones, execution identifiers and remaining submission tasks are recorded in [`STATUS.md`](STATUS.md).
 
 ## Architecture
 
-![Lambda Architecture for Scalable Nginx Web Log Analytics](docs/architecture/lambda_architecture_final.png)
+![Final Lambda Architecture](docs/architecture/lambda_architecture_final.png)
+
+### Historical path
 
 ```text
-Historical path
-Amazon S3 raw logs
-        ↓
+Nginx access logs
+        ->
+Amazon S3 raw-data storage
+        ->
 PySpark on Amazon EMR
-        ↓
-Historical aggregates and baseline RPM in Amazon S3
-        ↓
+        ->
+Historical aggregates and data-quality outputs in Amazon S3
+        ->
 Amazon Athena external tables and views
-
-Recent path
-Nginx log replay
-        ↓
-Amazon Kinesis Data Streams
-        ↓
-AWS Lambda speed processors
-        ↓
-Immutable invocation deltas in Amazon S3
-        ↓
-Global sliding-window aggregator
-        ↓
-Global speed snapshot
-
-Serving path
-Historical batch metrics + global speed snapshot
-        ↓
-Endpoint-level RPM comparison and traffic-spike classification
 ```
 
-The batch layer prioritises complete historical correctness. The speed layer provides recent low-latency analytics. The serving layer compares recent endpoint traffic with the historical baseline.
+### Recent path
+
+```text
+Nginx log replay
+        ->
+Amazon Kinesis Data Streams
+        ->
+AWS Lambda speed processors
+        ->
+Latest diagnostic snapshot and immutable invocation deltas in Amazon S3
+        ->
+Global event-time window aggregator
+        ->
+Global speed-layer snapshot
+```
+
+### Serving path
+
+```text
+Historical endpoint metrics from the batch layer
+        +
+Recent endpoint metrics from the global speed snapshot
+        ->
+RPM comparison, error-rate analysis and traffic-spike classification
+```
+
+The batch path prioritises complete historical correctness. The speed path provides recent analytics. The serving path combines both views without treating one Lambda execution environment as globally complete.
 
 ## Main Capabilities
 
 - Shared Nginx event schema across batch and streaming paths.
-- PySpark batch processing on Amazon EMR.
-- Kinesis producer batching with partial-failure retries.
+- Progressive parsing of large raw log files.
+- PySpark historical processing on Amazon EMR.
+- Data-quality counts and rejection-reason reporting.
+- Kinesis `PutRecords` batching with partial-failure retries.
 - Event-time sliding-window analytics.
 - Error-rate anomaly detection.
-- Immutable Lambda batch deltas in Amazon S3.
+- Immutable per-invocation Lambda delta documents in Amazon S3.
 - Global reconstruction across concurrent Lambda environments.
-- Endpoint-level recent RPM versus historical baseline comparison.
-- Athena SQL for historical queries and reconciliation checks.
-- Automated local, integration and AWS-oriented tests.
+- Duplicate-event removal and invalid-document accounting.
+- Historical versus recent endpoint RPM comparison.
+- Configurable traffic-spike rules.
+- Athena external tables, views, validation queries and demo queries.
+- Local, integration and AWS-oriented automated tests.
+- Retained and sanitised public evidence for the final experiments.
 
-## Shared Event Schema
+## Key Results
 
-The common fields are:
+### Final dataset and batch execution
 
-```text
-client_ip, timestamp, method, endpoint, protocol, status_code,
-response_bytes, referrer, user_agent
-```
+| Metric | Result |
+|---|---:|
+| Dataset size | 3,502,440,823 bytes |
+| Raw log lines | 10,365,152 |
+| Valid records | 10,365,077 |
+| Rejected records | 75 |
+| Invalid format records | 0 |
+| Invalid timestamp records | 0 |
+| Invalid request records | 75 |
+| Endpoint aggregate rows | 893,048 |
+| Error responses | 177,634 |
+| Response bytes | 128,870,996,472 |
+| Final CSV outputs | 10 |
 
-The Kinesis path additionally uses:
+All ten final CSV outputs came from the same validated EMR execution.
 
-```text
-event_id, ingested_at, source
-```
-
-Timestamps are normalised to timezone-aware ISO 8601 UTC values. `status_code` and `response_bytes` are integers, and `endpoint` is the official shared request-path field.
-
-## Repository Structure
-
-```text
-athena/       Athena DDL, views, validation and demo queries
-batch/        PySpark historical processing
-benchmark/    Batch, Kinesis and Lambda/S3 benchmark scripts
-deployment/   Lambda packaging helpers
-docs/         Architecture, evidence and project documentation
-infra/        EMR setup and infrastructure scripts
-producer/     Nginx parser and Kinesis replay
-results/      Machine-readable benchmark and integration outputs
-serving/      Batch/speed comparison and traffic-spike logic
-speed/        Sliding window, Lambda handler, S3 deltas and global aggregation
-tests/        Unit and integration tests
-```
-
-## Local Setup
-
-Requirements:
-
-- Python 3.11
-- Java 17
-- `pyspark==3.5.0`
-- AWS CLI for AWS executions
-
-Create and activate a virtual environment, then install dependencies:
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-```
-
-Run the complete test suite:
-
-```powershell
-python -m unittest discover -s tests -v
-```
-
-The latest completed suite contains 64 tests and completes with `OK` and exit code `0`. Local Spark on Windows may print `winutils.exe`, native Hadoop, socket-cleanup or temporary-directory warnings. These warnings do not invalidate a run whose unittest summary ends with `OK`.
-
-## Batch Layer: PySpark on Amazon EMR
-
-The batch layer reads the full Nginx log from Amazon S3 and produces ten historical and data-quality outputs:
-
-- `requests_per_endpoint/`
-- `traffic_by_hour/`
-- `error_rates/`
-- `baseline_rpm/`
-- `data_quality/`
-- `status_code_distribution/`
-- `response_byte_totals/`
-- `summary/`
-- `rejected_breakdown/`
-- `rejected_sample/`
-
-The final single-run EMR execution used:
-
-- Commit: `120dda8`
-- EMR cluster: `j-2KIK1VQPJT200`
-- EMR step: `s-09947463792EMAWECP0P`
-- Total raw lines: 10,365,152
-- Valid records: 10,365,077
-- Rejected records: 75
-- Invalid format records: 0
-- Invalid timestamp records: 0
-- Invalid request records: 75
-- Endpoint aggregate rows: 893,048
-- Total error responses: 177,634
-- Total response bytes: 128,870,996,472
-
-All ten final CSV outputs came from this same execution. They were reconciled locally, uploaded to `s3://scp-speed-results-25186396/batch/` and validated through Amazon Athena.
-
-Review the AWS values in `infra/emr_setup.sh`, then launch the EMR cluster:
-
-```bash
-chmod +x infra/emr_setup.sh
-./infra/emr_setup.sh
-```
-
-Upload and submit the Spark job using the paths printed or configured by the infrastructure script. Track the EMR step until it reaches `COMPLETED`.
-
-### Batch Benchmark Results
+### EMR worker benchmark
 
 | Workers | Execution time | Speedup | Efficiency |
 |---:|---:|---:|---:|
@@ -157,86 +114,28 @@ Upload and submit the Spark job using the paths printed or configured by the inf
 | 2 | 380.1 s | 1.08x | 54% |
 | 4 | 294.1 s | 1.40x | 35% |
 
-The measured speedup is sub-linear because Spark startup, scheduling, communication and shuffle overheads remain significant for this workload.
+The four-worker run was the fastest, but scaling was sub-linear because Spark startup, scheduling, communication, shuffle and final-output serialisation overheads remained significant.
 
-## Speed Layer: Kinesis and Lambda
+### Speed-layer load validation
 
-Build the Lambda deployment package:
+| Requested events | Successfully sent | Failed | Latest local snapshot | Global endpoint count |
+|---:|---:|---:|---:|---:|
+| 100 | 100 | 0 | 100 | 100 |
+| 500 | 500 | 0 | 500 | 500 |
+| 1,000 | 1,000 | 0 | 600 | 1,000 |
 
-```powershell
-python deployment/build_speed_lambda_package.py
-```
+The 1,000-event run demonstrates the distributed-state limitation of a per-environment Lambda snapshot. Immutable deltas allowed the global aggregator to recover all 1,000 benchmark events.
 
-Replay logs to Kinesis using the producer module and configured AWS credentials. The Lambda handler processes Kinesis batches, updates recent analytics and writes:
+### Real batch-speed serving validation
 
-```text
-s3://scp-speed-results-25186396/speed/latest_snapshot.json
-s3://scp-speed-results-25186396/speed/batches/...
-```
-
-`latest_snapshot.json` is a diagnostic snapshot from the most recent Lambda environment. It is not treated as globally complete when Lambda concurrency creates multiple execution environments.
-
-## Global Speed Aggregation
-
-Rebuild the complete event-time window from immutable invocation deltas:
-
-```powershell
-python -m speed.global_aggregator `
-  --bucket scp-speed-results-25186396 `
-  --prefix speed/batches `
-  --output-key speed/global_snapshot.json
-```
-
-The aggregator:
-
-- reads all relevant delta objects;
-- removes duplicate events;
-- applies the configured event-time window;
-- recalculates comparable speed-layer metrics;
-- writes `speed/global_snapshot.json`.
-
-AWS validation completed successfully for 100, 500 and 1,000 events. In the 1,000-event run, a local Lambda snapshot observed only 600 events while the global aggregator recovered all 1,000 endpoint events.
-
-## Endpoint RPM Comparison
-
-The serving layer calculates:
-
-```text
-recent_rpm = recent_requests x 60 / window_seconds
-```
-
-For each endpoint it exposes:
-
-- historical baseline RPM;
-- recent request count;
-- recent RPM;
-- RPM difference;
-- recent-to-baseline ratio;
-- traffic status;
-- significant-increase indicator.
-
-The default spike rule requires both:
-
-- a recent-to-baseline ratio of at least `2.0`;
-- at least `10` recent requests.
-
-The thresholds are configurable through the serving-layer command-line arguments.
-
-## Real Batch-Speed Serving Validation
-
-A final end-to-end serving validation combined real historical metrics from the EMR batch path with a recent global speed-layer snapshot.
-
-The historical baseline was obtained from the final EMR results through Amazon Athena. A controlled recent workload was then sent through Amazon Kinesis, AWS Lambda and Amazon S3 for the same endpoint.
-
-Validation result for `/settings/logo`:
+Validation endpoint: `/settings/logo`
 
 | Metric | Result |
 |---|---:|
 | Historical dataset records | 10,365,077 |
 | Historical endpoint requests | 352,047 |
 | Historical baseline RPM | 52.255752 |
-| Recent Kinesis events requested | 600 |
-| Successfully sent events | 600 |
+| Recent events sent to Kinesis | 600 |
 | Failed events | 0 |
 | Global-window events | 600 |
 | Recent RPM | 120.0 |
@@ -249,11 +148,284 @@ Validation result for `/settings/logo`:
 | Invalid documents | 0 |
 | Invalid events | 0 |
 
-The recent traffic rate was approximately 2.30 times the historical baseline. It therefore passed both configured traffic-spike conditions: a ratio of at least `2.0` and at least `10` recent requests.
+The recent request rate was approximately 2.30 times the historical baseline and exceeded the minimum recent-request threshold. The separate error-rate anomaly rule was not triggered because `0.05` was below the configured threshold of `0.50`.
 
-This traffic classification is independent from the error-rate anomaly rule. The recent error rate was `0.05`, below the configured anomaly threshold of `0.50`, so the run produced one significant traffic increase and zero error-rate anomalies.
+## Shared Event Schema
 
-Supporting outputs are stored in:
+Both processing paths use the following base fields:
+
+```text
+client_ip
+timestamp
+method
+endpoint
+protocol
+status_code
+response_bytes
+referrer
+user_agent
+```
+
+The Kinesis path additionally includes:
+
+```text
+event_id
+ingested_at
+source
+```
+
+Schema rules:
+
+- `endpoint` is the official request-path field.
+- `client_ip` replaces the earlier batch field `ip`.
+- `response_bytes` replaces the earlier batch field `bytes_sent`.
+- Timestamps are normalised to timezone-aware ISO 8601 UTC values.
+- `status_code` and `response_bytes` are integers.
+- A response-byte value of `-` is converted to zero.
+- HTTP requests must contain a method, endpoint and protocol.
+- `event_id` is generated as a unique identifier.
+- `source` is set to `nginx_access_log`.
+
+## Repository Structure
+
+```text
+athena/       Athena DDL, views, validation and demonstration queries
+batch/        PySpark historical processing
+benchmark/    Batch, Kinesis and Lambda/S3 benchmark scripts
+data/         Local data placeholders and controlled inputs
+deployment/   Lambda packaging helpers
+docs/         Architecture, evidence and project documentation
+infra/        EMR configuration and infrastructure scripts
+producer/     Nginx parsing and Kinesis replay utilities
+results/      Machine-readable benchmark and integration outputs
+serving/      Batch-speed comparison and traffic-spike logic
+speed/        Sliding window, Lambda handler, S3 deltas and global aggregation
+tests/        Unit and integration tests
+```
+
+## Requirements
+
+- Python 3.11
+- Java 17
+- Apache Spark 3.5.0 through `pyspark==3.5.0`
+- AWS CLI for AWS executions
+- Valid AWS credentials for Kinesis, Lambda, S3, EMR and Athena operations
+
+The project was evaluated in AWS Academy Learner Lab in `us-east-1`.
+
+## Local Setup
+
+### Windows PowerShell
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### Run the complete test suite
+
+```powershell
+python -m unittest discover -s tests -v
+```
+
+Latest verified result:
+
+```text
+Ran 64 tests in 24.606s
+
+OK
+```
+
+Local Spark on Windows may print warnings relating to `winutils.exe`, `HADOOP_HOME`, native Hadoop libraries, socket cleanup or temporary-directory deletion. These warnings do not invalidate a run whose unittest summary ends with `OK` and whose process exit code is `0`.
+
+### Run the controlled batch-stream comparison
+
+```powershell
+python -m serving.compare_controlled_window
+```
+
+Expected final result:
+
+```text
+ALL COMPARABLE METRICS MATCH
+```
+
+The generated machine-readable evidence is stored in:
+
+```text
+results/integration/batch_stream_comparison.json
+```
+
+## Batch Layer
+
+The batch job reads raw Nginx combined-log records, applies the shared validation rules and generates ten output groups:
+
+```text
+requests_per_endpoint/
+traffic_by_hour/
+error_rates/
+baseline_rpm/
+data_quality/
+status_code_distribution/
+response_byte_totals/
+summary/
+rejected_breakdown/
+rejected_sample/
+```
+
+Example Spark submission:
+
+```bash
+spark-submit batch/batch_job.py \
+  --input s3://<input-bucket>/raw-data/ \
+  --output s3://<output-bucket>/batch-results/
+```
+
+The infrastructure template is located at:
+
+```text
+infra/emr_setup.sh
+```
+
+Review all bucket, subnet, key-pair and instance values before running it.
+
+### Historical baseline definition
+
+The endpoint baseline represents the mean request count across active minute buckets for that endpoint. Minutes in which the endpoint received no requests are not materialised in the grouped Spark result.
+
+### Final-write decision
+
+The batch outputs use `coalesce(1)` to create one CSV part file per output. This simplified evidence collection, delivery reconciliation and Athena registration for the assessed experiment. It also introduced a serial final-write bottleneck. A production design would retain partitioned output.
+
+## EMR Automatic-Scaling Evaluation
+
+The core instance group was configured with:
+
+- minimum capacity: 1;
+- initial capacity: 2;
+- maximum capacity: 5;
+- scale-out threshold: YARN memory available below 15%;
+- scale-in threshold: YARN memory available above 75%;
+- cooldown: 300 seconds.
+
+The final retry corrected the earlier Step-concurrency configuration:
+
+- Step Concurrency Level was confirmed as 4.
+- Four EMR Steps started at approximately the same time.
+- Pending containers reached 28.
+- The complete unfiltered post-test inventory contained two core instances and one master instance.
+- No additional core instance was present.
+- No verified scale-out occurred.
+
+The result is reported as a verified policy configuration and genuine concurrent trigger attempt, not as demonstrated elastic scale-out.
+
+Batch and EMR evidence is indexed in:
+
+```text
+docs/evidence/batch/README.md
+```
+
+## Producer and Kinesis Replay
+
+The producer path:
+
+1. reads the log progressively;
+2. parses each line using the shared Nginx parser;
+3. skips and counts malformed lines;
+4. adds `event_id`, `ingested_at` and `source`;
+5. uses `client_ip` as the Kinesis partition key;
+6. sends up to 500 records in each `PutRecords` request;
+7. retries only failed records;
+8. reports successful and permanently failed records.
+
+The reusable implementation is located in:
+
+```text
+producer/log_parser.py
+producer/replay_logs.py
+```
+
+## Speed Layer
+
+The speed layer calculates recent:
+
+- requests per endpoint;
+- traffic by hour;
+- error rates per endpoint;
+- HTTP status-code distribution;
+- response-byte totals per endpoint;
+- complete response-byte totals;
+- window boundaries and event counts.
+
+The Lambda deployment package can be built with:
+
+```powershell
+python deployment/build_speed_lambda_package.py
+```
+
+The Lambda writes:
+
+```text
+speed/latest_snapshot.json
+speed/batches/<immutable-delta-documents>.json
+```
+
+`latest_snapshot.json` is a diagnostic snapshot from the most recent Lambda execution environment. It is not treated as globally complete under concurrency.
+
+## Global Speed Aggregation
+
+Rebuild the global event-time window from immutable Lambda deltas:
+
+```powershell
+python -m speed.global_aggregator `
+  --bucket <results-bucket> `
+  --prefix speed/batches `
+  --output-key speed/global_snapshot.json `
+  --window-seconds 300
+```
+
+The aggregator:
+
+- lists the persisted delta documents;
+- validates each document;
+- removes duplicate events;
+- rejects invalid events without stopping the run;
+- applies the configured event-time window;
+- recalculates the speed-layer metrics;
+- detects recent error-rate anomalies;
+- writes one consolidated global snapshot.
+
+## Serving Layer
+
+Recent RPM is calculated as:
+
+```text
+recent_rpm = recent_requests * 60 / window_seconds
+```
+
+For each endpoint, the serving view exposes:
+
+- historical requests and errors;
+- historical error rate;
+- historical response bytes;
+- historical baseline RPM;
+- recent request count;
+- recent RPM;
+- RPM difference;
+- recent-to-baseline ratio;
+- traffic status;
+- significant-increase indicator.
+
+The default traffic-spike rule requires:
+
+- a recent-to-baseline ratio of at least `2.0`; and
+- at least `10` recent requests.
+
+Traffic-spike classification is separate from the error-rate anomaly rule.
+
+Supporting final serving outputs are stored in:
 
 ```text
 results/serving/real_batch_metrics.json
@@ -261,7 +433,6 @@ results/serving/real_global_aggregation_run.json
 results/serving/real_global_snapshot.json
 results/serving/real_combined_serving_view.json
 docs/evidence/serving/01_real_batch_speed_validation.txt
-docs/evidence/tests/02_full_suite_64_tests.txt
 ```
 
 ## Amazon Athena
@@ -276,34 +447,109 @@ Athena scripts are stored in `athena/` and should be executed in this order:
 05_demo_queries.sql
 ```
 
-Deployment status in `us-east-1`:
+The deployed analytical layer contains:
 
-- Database: `scp_web_logs_25186396`
-- Workgroup: `primary`
-- Query results: `s3://scp-speed-results-25186396/athena-results/`
-- External tables: 7
-- Views: 2
+- 1 database;
+- 7 external tables;
+- 2 views;
+- reconciliation queries;
+- demonstration queries for endpoints, errors and RPM comparison.
 
-The final real EMR `part-*.csv` outputs are present in the expected S3 prefixes. Athena validation confirmed:
+Final Athena validation confirmed:
 
 - 893,048 endpoint rows;
 - 10,365,077 requests across each main aggregate;
-- 128,870,996,472 response bytes reconciled with the batch summary;
+- 128,870,996,472 response bytes;
 - 177,634 error responses;
 - 15 HTTP status-code categories;
-- no empty baseline endpoints or null RPM values.
+- no empty baseline endpoints;
+- no null baseline RPM values.
 
-Final query screenshots are stored in `docs/evidence/athena/screenshots/`.
+Athena screenshots are stored in:
+
+```text
+docs/evidence/athena/screenshots/
+```
+
+## Evidence
+
+Evidence is organised by processing layer:
+
+```text
+docs/evidence/batch/
+docs/evidence/integration/
+docs/evidence/speed/
+docs/evidence/serving/
+docs/evidence/athena/
+docs/evidence/tests/
+```
+
+Public AWS screenshots and JSON evidence have been sanitised where necessary. The complete unedited originals are retained in the private project evidence archive.
+
+Important evidence indexes:
+
+- [`docs/evidence/batch/README.md`](docs/evidence/batch/README.md)
+- [`docs/evidence/athena/screenshots/README.md`](docs/evidence/athena/screenshots/README.md)
+- [`STATUS.md`](STATUS.md)
 
 ## Current Limitations
 
-- AWS Academy Learner Lab sessions can expire and terminate EMR or Cloud9 resources.
-- The EMR auto-scaling policy was configured and evidenced, but a live scale-out was not observed within the available Learner Lab constraints.
-- Under concurrent Lambda invocations, the latest per-invocation snapshot may contain only part of a large benchmark. The global aggregator reconstructs the complete event-time window from persisted batch deltas.
-- The global speed-layer aggregation is currently executed explicitly rather than through a scheduled production workflow.
+- AWS Academy Learner Lab sessions can expire and terminate temporary resources.
+- No completed EMR scale-out was verified during the retained automatic-scaling experiment.
+- The historical endpoint baseline is calculated from active minute buckets rather than materialising zero-request minutes.
+- `coalesce(1)` creates a serial final-write stage in the batch path.
+- A per-environment Lambda snapshot is not globally complete under concurrency.
+- The global aggregator currently rereads persisted delta documents and runs explicitly rather than through a scheduled incremental workflow.
+- The event-time window advances when a newer event arrives. During complete source idleness, older events remain until another event is processed or the window is rebuilt.
+- The controlled benchmarks demonstrate behaviour in the evaluated AWS Academy environment, not a production service-level agreement.
 
-## Project Status
+## Production Improvements
 
-The implementation, 64-test validation, final EMR delivery, S3 upload, Athena reconciliation, real Batch-Speed serving validation and evidence collection are complete.
+A production implementation should:
 
-See [`STATUS.md`](STATUS.md) for detailed milestones, AWS identifiers, benchmark results and evidence locations.
+- write partitioned batch outputs instead of using `coalesce(1)`;
+- materialise a clearly defined full-time baseline when zero-request minutes must be included;
+- trigger global aggregation through an incremental scheduled or event-driven workflow;
+- maintain checkpoints so only new delta documents are processed;
+- apply S3 lifecycle rules to old immutable deltas;
+- use source-idleness handling or a periodic processing-time trigger for window eviction;
+- repeat automatic-scaling tests in an unrestricted AWS account;
+- add continuous integration after validating the Spark and Java environment.
+
+## Team Contributions
+
+### Maryhelen
+
+- Shared schema and repository integration
+- Nginx parser and reliable Kinesis replay
+- Sliding-window speed analytics
+- Kinesis-triggered Lambda processing
+- S3 snapshot and immutable-delta persistence
+- Global speed-layer aggregation
+- Combined serving view and traffic-spike comparison
+- Athena deployment, reconciliation and evidence
+- Final architecture, integration evidence and documentation
+
+### Nalini
+
+- PySpark batch-processing implementation
+- Amazon EMR execution and worker benchmarks
+- EMR automatic-scaling configuration and evidence
+- Final batch outputs and data-quality evidence
+- Batch benchmark documentation
+
+## Dataset
+
+The project uses the Kaggle **Web Server Access Logs** dataset, containing raw Nginx-style access-log records. The complete dataset is not committed to Git because of its size.
+
+Small controlled fixtures required by the tests are stored under:
+
+```text
+tests/fixtures/
+```
+
+## Academic Context
+
+This repository was developed for the Scalable Cloud Programming continuous assessment in the MSc in Cloud Computing programme at the National College of Ireland.
+
+The repository is an academic prototype. It should not be treated as a production monitoring service without the improvements described above.

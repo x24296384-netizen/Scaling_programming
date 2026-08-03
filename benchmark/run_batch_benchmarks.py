@@ -1,14 +1,12 @@
-"""
-Benchmarking harness for the batch layer.
+"""Benchmark harness for the PySpark batch layer.
 
-Idea: run batch_job.py against the same input with the EMR core node count
-changed each time (1, 2, 3+ workers), grab the elapsed time it prints out,
-then compute speedup and efficiency vs the 1-worker baseline.
+The script executes the batch job against the same input while the EMR core
+capacity is changed between benchmark runs. It records elapsed execution time
+and calculates speedup and parallel efficiency relative to the one-worker
+baseline.
 
-This has to be run manually between resizing the EMR cluster each time
-(aws emr modify-instance-groups), since Spark itself doesn't control how
-many core nodes exist. Logging the results here so we can turn them
-straight into the speedup/efficiency graphs the report needs.
+The EMR instance-group capacity must be adjusted separately before each run.
+S3 input and output paths must also be configured before execution.
 """
 
 import csv
@@ -16,11 +14,11 @@ import re
 import subprocess
 import sys
 
-INPUT_PATH = "s3://scp-nalini-logs-2026/raw-data/"
-OUTPUT_PATH = "s3://scp-nalini-logs-2026/batch-results/"
+INPUT_PATH = "s3://<data-bucket>/raw-data/"
+OUTPUT_PATH = "s3://<results-bucket>/batch-results/"
 RESULTS_CSV = "benchmark_results.csv"
 
-# fill this in with whatever worker counts we actually test
+# Worker counts used in the controlled EMR benchmark.
 WORKER_COUNTS_TO_TEST = [1, 2, 4]
 
 

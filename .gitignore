@@ -20,7 +20,7 @@ data/*.gz
 data/raw/
 
 #Benchmarking outputs
-benchmarks/results/
+benchmark/results/
 
 #IDE
 .vscode/
@@ -30,3 +30,16 @@ benchmarks/results/
 .DS_Store
 Thumbs.db
 build/
+
+# Coverage and development artefacts
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+.mypy_cache/
+.ruff_cache/
+
+# Spark local artefacts
+spark-warehouse/
+metastore_db/
+derby.log
