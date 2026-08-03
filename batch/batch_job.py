@@ -1,8 +1,9 @@
 """PySpark batch layer for historical Nginx access-log analytics.
 
-The job parses raw Nginx combined-log records using the shared project
-schema, validates malformed input, calculates historical aggregates and
-writes analytical and data-quality outputs to Amazon S3.
+The job parses records from the dataset-specific extended Nginx log format
+using the shared project schema, validates malformed input, calculates
+historical aggregates and writes analytical and data-quality outputs to
+Amazon S3.
 
 Example:
     spark-submit batch/batch_job.py \
@@ -17,8 +18,9 @@ from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.types import IntegerType
 
-# standard nginx "combined" log format regex — covers:
-# remote_addr - remote_user [time_local] "method path protocol" status bytes_sent "referer" "user_agent"
+# Dataset-specific extended Nginx combined-log format:
+# remote_addr - remote_user [time_local] "method path protocol" status bytes_sent
+# "referer" "user_agent" "extra"
 LOG_PATTERN = (
     r'^(\S+) \S+ \S+ '
     r'\[([^\]]+)\] '
