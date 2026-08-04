@@ -2,7 +2,7 @@
 
 ## Project
 
-- **Title:** Scalable Web Log Analytics
+- **Title:** CloudScale Log Analytics: A Scalable Lambda Architecture for Near-Real-Time Web Server Monitoring on AWS
 - **Architecture:** Lambda Architecture
 - **Cloud platform:** Amazon Web Services
 - **Primary region:** `us-east-1`
@@ -35,9 +35,8 @@ compare recent endpoint RPM with a historical baseline.
 - **Final submission:** Complete
 
 No additional architecture or repository integration work is required. The
-final report and demonstration video are complete. The remaining work is
-limited to submitting the final report and the `main` repository link, then
-preserving the submission receipt.
+final report, demonstration video and submission are complete. The repository
+is preserved as the final academic submission.
 
 ## Team Responsibilities
 
@@ -752,5 +751,3 @@ summary ends with `OK` and the process exit code is `0`.
 - No additional core instance was present.
 - No verified scale-out event occurred.
 - Evidence is stored in `docs/evidence/batch/12_*` through `16_*`.
-
-| Final report and demonstration | Complete |

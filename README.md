@@ -1,4 +1,6 @@
-# Scalable Web Log Analytics
+# CloudScale Log Analytics
+
+## A Scalable Lambda Architecture for Near-Real-Time Web Server Monitoring on AWS
 
 A Lambda Architecture project for scalable historical and near-real-time analysis of large Nginx access logs using Python, PySpark, Amazon EMR, Amazon Kinesis Data Streams, AWS Lambda, Amazon S3 and Amazon Athena.
 
@@ -6,7 +8,7 @@ The system combines a complete historical batch path with a recent event-time sp
 
 ## Project Status
 
-The technical implementation is complete on the `main` branch.
+The technical implementation and final academic submission are complete on the `main` branch.
 
 | Area | Status |
 |---|---|
@@ -19,8 +21,16 @@ The technical implementation is complete on the `main` branch.
 | Batch-speed serving validation | Complete |
 | Automated tests | 64 passed |
 | Architecture and evidence | Complete |
+| Final report and demonstration | Complete |
+| Final submission | Complete |
 
 Detailed milestones, execution identifiers and final submission status are recorded in [`STATUS.md`](STATUS.md).
+
+## Final Demonstration
+
+[Watch the final project demonstration on YouTube](https://www.youtube.com/watch?v=peNQipD__vU)
+
+The demonstration presents the implemented Lambda Architecture, the PySpark and Amazon EMR batch path, the Amazon Kinesis and AWS Lambda speed path, the global serving view, the performance results and the final EMR automatic-scaling evaluation.
 
 ## Architecture
 
