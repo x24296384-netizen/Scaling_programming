@@ -20,7 +20,7 @@ The technical implementation is complete on the `main` branch.
 | Automated tests | 64 passed |
 | Architecture and evidence | Complete |
 
-Detailed milestones, execution identifiers and remaining submission tasks are recorded in [`STATUS.md`](STATUS.md).
+Detailed milestones, execution identifiers and final submission status are recorded in [`STATUS.md`](STATUS.md).
 
 ## Architecture
 
@@ -260,7 +260,7 @@ results/integration/batch_stream_comparison.json
 
 ## Batch Layer
 
-The batch job reads raw Nginx combined-log records, applies the shared validation rules and generates ten output groups:
+The batch job reads records from the dataset-specific extended Nginx combined-log format, applies the shared validation rules and generates ten output groups:
 
 ```text
 requests_per_endpoint/

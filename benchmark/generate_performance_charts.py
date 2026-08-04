@@ -34,7 +34,7 @@ def load_speed_runs() -> list[dict[str, Any]]:
     runs: list[dict[str, Any]] = []
 
     for path in BENCHMARK_DIR.glob(
-        "lambda_s3_load_*.json"
+        "lambda_s3_validation_*.json"
     ):
         document = json.loads(
             path.read_text(

@@ -30,12 +30,14 @@ compare recent endpoint RPM with a historical baseline.
 - **Automated tests:** 64 passed
 - **Performance analysis:** Complete
 - **Repository review and merge into `main`:** Complete
-- **Technical report:** Final review in progress
-- **Presentation, demonstration and submission:** Pending
+- **Technical report:** Complete
+- **Presentation and demonstration:** Complete
+- **Final submission:** Complete
 
 No additional architecture or repository integration work is required. The
-remaining work is limited to final report checks, the presentation and
-demonstration, submission and preservation of the submission receipt.
+final report and demonstration video are complete. The remaining work is
+limited to submitting the final report and the `main` repository link, then
+preserving the submission receipt.
 
 ## Team Responsibilities
 
@@ -735,14 +737,10 @@ summary ends with `OK` and the process exit code is `0`.
 - [x] Confirm that `main` was clean and synchronised
 - [x] Commit and push the final repository structure and evidence
 - [x] Integrate the final concurrent EMR auto-scaling trigger evidence
-
-## Remaining Tasks
-
-- [ ] Insert the final presentation URL and signatures in the report
-- [ ] Export and visually verify the final PDF
-- [ ] Prepare presentation slides, demonstration notes and backup video
-- [ ] Submit the report and `main` repository link
-- [ ] Save the submission receipt
+- [x] Insert the final presentation URL and signatures in the report
+- [x] Export and visually verify the final PDF
+- [x] Prepare presentation slides, demonstration notes and backup video
+- [x] Submit the report and `main` repository link
 
 ### Final EMR auto-scaling attempt
 
@@ -754,3 +752,5 @@ summary ends with `OK` and the process exit code is `0`.
 - No additional core instance was present.
 - No verified scale-out event occurred.
 - Evidence is stored in `docs/evidence/batch/12_*` through `16_*`.
+
+| Final report and demonstration | Complete |
